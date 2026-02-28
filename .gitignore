@@ -1,0 +1,11 @@
+node_modules
+.env
+dist
+build.log
+*.log
+.DS_Store
+.vscode
+.gemini
+bin
+obj
+out
