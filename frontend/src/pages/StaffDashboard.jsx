@@ -10,7 +10,8 @@ import {
 import {
     apiGetDepartmentTickets, apiUpdateTicketStatus, apiAddRemark,
     apiUpdateProfile, apiGetNotifications, apiMarkAllNotificationsRead,
-    apiGetAnnouncements, apiDeleteProfilePicture, apiGetCategories, apiChangePassword
+    apiGetAnnouncements, apiDeleteProfilePicture, apiGetCategories, apiChangePassword,
+    apiUpdateRemark, SERVER_URL
 } from '../api';
 
 const StaffDashboard = ({ user, setUser, onLogout }) => {
@@ -71,7 +72,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
     const openFile = (url) => {
         if (!url) return;
         if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || url.startsWith('data:image')) {
-            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `http://localhost:5000${url}`);
+            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `${SERVER_URL}${url}`);
             return;
         }
         if (url.startsWith('data:')) {
@@ -82,7 +83,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                 alert('Please allow popups to view files');
             }
         } else {
-            window.open(url.startsWith('http') ? url : `http://localhost:5000${url}`, '_blank');
+            window.open(url.startsWith('http') ? url : `${SERVER_URL}${url}`, '_blank');
         }
     };
 
@@ -588,7 +589,8 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             {file.fileType === 'image' ? (
                                                                 <div style={{ width: '100%', height: '120px', background: '#f1f5f9', borderRadius: '12px', marginBottom: '0.8rem', overflow: 'hidden', position: 'relative' }}>
                                                                     <img
-                                                                        src={file.url?.startsWith('data:') ? file.url : (file.url?.startsWith('http') ? file.url : `http://localhost:5000${file.url}`)}
+                                                                        src={file.url?.startsWith('data:') ? file.url : (file.url?.startsWith('http') ? file.url : `${SERVER_URL}${file.url}`
+                                                                        )}
                                                                         alt="Screenshot"
                                                                         style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
                                                                         onClick={() => openFile(file.url)}
@@ -837,7 +839,7 @@ const StaffSettingsView = ({ user, setUser }) => {
     };
 
     const profilePhotoUrl = user?.profilePicture
-        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`)
+        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
     return (

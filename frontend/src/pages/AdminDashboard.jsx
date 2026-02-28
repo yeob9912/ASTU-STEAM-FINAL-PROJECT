@@ -18,7 +18,8 @@ import {
     apiGetCategories, apiCreateCategory, apiUpdateCategory, apiDeleteCategory,
     apiGetAnnouncements, apiCreateAnnouncement, apiDeleteAnnouncement,
     apiUpdateProfile, apiGetNotifications, apiMarkAllNotificationsRead, apiDeleteProfilePicture,
-    apiUploadKnowledgeBase, apiGetKnowledgeBaseFiles, apiDeleteKnowledgeBaseFile, apiChangePassword
+    apiUploadKnowledgeBase, apiGetKnowledgeBaseFiles, apiDeleteKnowledgeBaseFile, apiChangePassword,
+    SERVER_URL
 } from '../api';
 
 // Redundant DEPARTMENTS removed
@@ -152,7 +153,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     const openFile = (url) => {
         if (!url) return;
         if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || url.startsWith('data:image')) {
-            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `http://localhost:5000${url}`);
+            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `${SERVER_URL}${url}`);
             return;
         }
         if (url.startsWith('data:')) {
@@ -163,7 +164,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 alert('Please allow popups to view files');
             }
         } else {
-            window.open(url.startsWith('http') ? url : `http://localhost:5000${url}`, '_blank');
+            window.open(url.startsWith('http') ? url : `${SERVER_URL}${url}`, '_blank');
         }
     };
 
@@ -1362,7 +1363,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                                     <div key={i} style={{ padding: '0.5rem', background: '#f8fafc', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
                                                         {att.fileType === 'image' ? (
                                                             <div style={{ width: '100%', height: '80px', borderRadius: '8px', marginBottom: '0.5rem', overflow: 'hidden' }}>
-                                                                <img src={att.url.startsWith('data:') ? att.url : (att.url.startsWith('http') ? att.url : `http://localhost:5000${att.url}`)} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                                <img src={att.url.startsWith('data:') ? att.url : (att.url.startsWith('http') ? att.url : `${SERVER_URL}${att.url}`)} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                             </div>
                                                         ) : (
                                                             <div style={{ width: '100%', height: '80px', background: '#e2e8f0', borderRadius: '8px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -1589,7 +1590,7 @@ const AdminSettingsView = ({ user, setUser }) => {
     };
 
     const profilePhotoUrl = user?.profilePicture
-        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`)
+        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
     return (

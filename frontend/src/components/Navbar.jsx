@@ -11,7 +11,9 @@ import {
     apiGetNotifications,
     apiMarkAllNotificationsRead,
     apiMarkNotificationRead,
-    apiDeleteNotification
+    apiDeleteNotification,
+    apiDeleteProfilePicture,
+    SERVER_URL
 } from '../api';
 
 const Navbar = ({ user, onLogout }) => {
@@ -262,7 +264,7 @@ const Navbar = ({ user, onLogout }) => {
                                                                     padding: '0.8rem',
                                                                     borderRadius: '12px',
                                                                     background: !n.isRead ? 'rgba(37,99,235,0.06)' : 'var(--card-bg)',
-                                                                    border: `1px solid ${isExpanded ? 'var(--primary)' : 'var(--border)'}`,
+                                                                    border: `1px solid ${isExpanded ? 'var(--primary)' : 'var(--border)'} `,
                                                                     cursor: 'pointer',
                                                                     transition: 'border-color 0.2s ease, background 0.2s ease',
                                                                     boxShadow: isExpanded ? '0 4px 12px -2px rgba(37,99,235,0.15)' : 'none'
@@ -273,7 +275,7 @@ const Navbar = ({ user, onLogout }) => {
                                                                 <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'flex-start' }}>
                                                                     <div style={{ marginTop: '5px', flexShrink: 0 }}>
                                                                         {!n.isRead
-                                                                            ? <motion.div layoutId={`dot-${n._id}`} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} />
+                                                                            ? <motion.div layoutId={`dot - ${n._id} `} style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--primary)' }} />
                                                                             : <div style={{ width: '8px' }} />
                                                                         }
                                                                     </div>
@@ -377,41 +379,41 @@ const Navbar = ({ user, onLogout }) => {
                             }}>
                                 {user?.profilePicture ? (
                                     <img
-                                        src={user.profilePicture.startsWith('data:') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`}
+                                        src={user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`}
                                         alt="Profile"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
                                 ) : (
                                     <UserIcon size={20} />
                                 )}
-                            </div>
+                            </div >
                             <div className="desk-only">
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', textTransform: 'capitalize' }}>{user?.name || 'User'}</p>
                                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'capitalize' }}>{user?.role || 'Portal Access'}</p>
                             </div>
-                        </div>
+                        </div >
 
                         {/* ── Logout: desktop only ── */}
-                        <button onClick={onLogout} className="desk-only btn" style={{ background: '#ff4d4d1a', color: '#ff4d4d', padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
+                        < button onClick={onLogout} className="desk-only btn" style={{ background: '#ff4d4d1a', color: '#ff4d4d', padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
                             <LogOut size={18} /> <span>Logout</span>
-                        </button>
+                        </button >
 
                         {/* ── Hamburger: mobile only ── */}
-                        <button
+                        < button
                             className="mob-only btn"
                             style={{ padding: '8px' }}
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
                             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
-                    </div>
+                        </button >
+                    </div >
                 ) : (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <Link to="/login" className="btn" style={{ color: 'var(--text-main)', padding: '0.5rem 1.2rem' }}>Login</Link>
                         <Link to="/signup" className="btn btn-primary" style={{ padding: '0.5rem 1.2rem' }}><span>Join Now</span></Link>
                     </div>
                 )}
-            </div>
+            </div >
 
 
             <AnimatePresence>
@@ -461,7 +463,7 @@ const Navbar = ({ user, onLogout }) => {
                                     <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', overflow: 'hidden' }}>
                                         {user?.profilePicture ? (
                                             <img
-                                                src={user.profilePicture.startsWith('data:') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`}
+                                                src={user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`}
                                                 alt="Profile"
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             />
@@ -582,7 +584,7 @@ const Navbar = ({ user, onLogout }) => {
                     </>
                 )}
             </AnimatePresence>
-        </nav>
+        </nav >
     );
 };
 

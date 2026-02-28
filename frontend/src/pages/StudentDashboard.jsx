@@ -8,7 +8,7 @@ import {
     Bell, LayoutDashboard, Share2, MoreVertical, X, List, ClipboardList,
     LogOut, Camera, Upload, Trash2, Download
 } from 'lucide-react';
-import { apiCreateTicket, apiGetMyTickets, apiGetCategories, apiUpdateProfile, apiGetAnnouncements, apiDeleteProfilePicture, apiChangePassword } from '../api';
+import { apiCreateTicket, apiGetMyTickets, apiGetCategories, apiUpdateProfile, apiGetAnnouncements, apiDeleteProfilePicture, apiChangePassword, SERVER_URL } from '../api';
 
 const StudentDashboard = ({ user, setUser, onLogout }) => {
     const navigate = useNavigate();
@@ -81,7 +81,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
     const openFile = (url) => {
         if (!url) return;
         if (url.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || url.startsWith('data:image')) {
-            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `http://localhost:5000${url}`);
+            setViewImage(url.startsWith('http') || url.startsWith('data:') ? url : `${SERVER_URL}${url}`);
             return;
         }
         if (url.startsWith('data:')) {
@@ -92,7 +92,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                 alert('Please allow popups to view files');
             }
         } else {
-            window.open(url.startsWith('http') ? url : `http://localhost:5000${url}`, '_blank');
+            window.open(url.startsWith('http') ? url : `${SERVER_URL}${url}`, '_blank');
         }
     };
 
@@ -492,7 +492,8 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                                     {att.fileType === 'image' ? (
                                                         <>
                                                             <img
-                                                                src={att.url.startsWith('data:') ? att.url : (att.url.startsWith('http') ? att.url : `http://localhost:5000${att.url}`)}
+                                                                src={att.url.startsWith('data:') ? att.url : (att.url.startsWith('http') ? att.url : `${SERVER_URL}${att.url}`
+                                                                )}
                                                                 alt="Attachment"
                                                                 style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '10px', cursor: 'pointer' }}
                                                                 onClick={() => openFile(att.url)}
@@ -772,7 +773,7 @@ const StudentSettingsView = ({ user, setUser }) => {
     };
 
     const profilePhotoUrl = user?.profilePicture
-        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `http://localhost:5000${user.profilePicture}`)
+        ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
     return (
