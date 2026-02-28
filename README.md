@@ -146,14 +146,6 @@ MongoDB Database
 Vector Search Layer  
 ⬇  
 RAG AI Pipeline  
-
----
-
-
-### Installation
-1.  **Backend**: `cd backend && npm install && npm run dev`
-2.  **Frontend**: `cd frontend && npm install && npm run dev`
-
 ---
 
 ## 🌟 Why This Project Stands Out
