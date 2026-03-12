@@ -17,6 +17,16 @@ import {
 const StaffDashboard = ({ user, setUser, onLogout }) => {
     const location = useLocation();
     const [complaints, setComplaints] = useState([]);
+    
+    const containerVariants = {
+        hidden: { opacity: 1 },
+        visible: { opacity: 1, transition: { duration: 0 } }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 1, y: 0 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0 } }
+    };
     const [notifications, setNotifications] = useState([]);
     const [announcements, setAnnouncements] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -39,6 +49,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
     const [remarkLoading, setRemarkLoading] = useState(false);
     const [view, setView] = useState('tickets');
     const [tempStatus, setTempStatus] = useState('');
+    const [tempPriority, setTempPriority] = useState('');
     const [viewImage, setViewImage] = useState(null);
 
     const DEPARTMENTS = useMemo(() => {
@@ -110,6 +121,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
 
         const res = await apiUpdateTicketStatus(ticketId, {
             status: tempStatus,
+            priority: tempPriority,
             remark: remarkText
         });
 
@@ -292,14 +304,15 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                 {view === 'settings' ? (
                     <StaffSettingsView user={user} setUser={setUser} />
                 ) : view === 'announcements' ? (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         {announcements.length > 0 ? announcements.map((ann, idx) => (
                             <motion.div
+                                variants={itemVariants}
                                 key={idx}
                                 className="card"
                                 style={{ padding: '2rem', borderLeft: '4px solid var(--primary)', cursor: 'pointer' }}
                                 onClick={() => setSelectedAnnouncement(ann)}
-                                whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                                whileHover={{ y: -5, scale: 1.01, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                                     <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{ann.title}</h3>
@@ -372,8 +385,8 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                     </motion.div>
                 ) : (
                     <div className="card" style={{ padding: '0' }}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', gap: '1.5rem' }}>
-                            <div style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>
+                        <div className="staff-controls-row">
+                            <div className="staff-search-container">
                                 <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                 <input
                                     className="input"
@@ -398,14 +411,15 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                         <th style={{ padding: '1.2rem 1.5rem', textAlign: 'right' }}>Management</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                                     {filteredComplaints.map((c) => (
                                         <motion.tr
+                                            variants={itemVariants}
                                             layout
                                             key={c._id || c.id}
                                             onClick={() => { setSelectedTicket(c); setModalMode('view'); setRemarkText(''); }}
                                             style={{ borderBottom: '1px solid var(--border)', background: 'white', cursor: 'pointer' }}
-                                            whileHover={{ background: '#f8fafc' }}
+                                            whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }}
                                         >
                                             <td style={{ padding: '1.5rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -455,6 +469,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             setModalMode('edit');
                                                             setRemarkText('');
                                                             setTempStatus(c.status);
+                                                            setTempPriority(c.priority || 'Normal');
                                                         }}
                                                         className="btn glass"
                                                         style={{ padding: '0.6rem' }}
@@ -465,7 +480,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                             </td>
                                         </motion.tr>
                                     ))}
-                                </tbody>
+                                </motion.tbody>
                             </table>
                         </div>
                         {filteredComplaints.length === 0 && (
@@ -675,6 +690,18 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             <option value="Resolved">Resolved</option>
                                                         </select>
 
+                                                        <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Change Priority</label>
+                                                        <select
+                                                            className="input"
+                                                            value={tempPriority}
+                                                            onChange={(e) => setTempPriority(e.target.value)}
+                                                            style={{ background: 'white', marginBottom: '1rem', width: '100%' }}
+                                                        >
+                                                            <option value="Normal">Normal</option>
+                                                            <option value="Urgent">Urgent</option>
+                                                            <option value="Classical">Classical</option>
+                                                        </select>
+
                                                         <label style={{ display: 'block', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Add Remark (Optional)</label>
                                                         <textarea
                                                             className="input"
@@ -722,6 +749,11 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                 <div style={{ marginBottom: '1.5rem' }}>
                                                     <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>SUBMITTED ON</p>
                                                     <p style={{ margin: 0, fontWeight: 700 }}>{selectedTicket.date}</p>
+                                                </div>
+
+                                                <div style={{ marginBottom: '1.5rem' }}>
+                                                    <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>PRIORITY</p>
+                                                    <p style={{ margin: 0, fontWeight: 700 }}>{selectedTicket.priority || 'Normal'}</p>
                                                 </div>
 
                                                 <div style={{ marginBottom: '2rem' }}>

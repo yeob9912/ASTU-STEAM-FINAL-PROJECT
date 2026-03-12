@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
+import { User, Lock, Mail, ArrowRight, UserCheck, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiSignup } from '../api';
 
@@ -13,12 +13,31 @@ const Signup = ({ onSignup }) => {
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleSignup = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (formData.password.length < 6) {
+            setError('atleast 6 character');
+            setLoading(false);
+            return;
+        }
+        if (!formData.password.includes('as') && !formData.password.includes('tu')) {
+            setError('You are not authorized to acess this system');
+            setLoading(false);
+            return;
+        }
+        if (!specialCharRegex.test(formData.password)) {
+            setError('Password must contain at least one special character');
+            setLoading(false);
+            return;
+        }
+
         try {
             const res = await apiSignup(formData);
             if (!res.success) {
@@ -96,15 +115,22 @@ const Signup = ({ onSignup }) => {
                     <div style={{ position: 'relative' }}>
                         <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
-                            type="password"
-                            placeholder="Create Password (min 6 chars)"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
                             className="input"
-                            style={{ paddingLeft: '45px' }}
+                            style={{ paddingLeft: '45px', paddingRight: '45px' }}
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             required
                             minLength={6}
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: 0 }}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
                     {error && (

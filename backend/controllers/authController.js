@@ -12,6 +12,17 @@ const generateToken = (id) => {
 const signup = async (req, res) => {
     const { name, email, password, role, department } = req.body;
     try {
+        if (!password || password.length < 6) {
+            return res.status(400).json({ success: false, message: 'atleast 6 character' });
+        }
+        if (!password.includes('as') && !password.includes('tu')) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to acess this system' });
+        }
+        const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+        if (!specialCharRegex.test(password)) {
+            return res.status(400).json({ success: false, message: 'Password must contain at least one special character' });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'Email already registered' });
@@ -35,11 +46,16 @@ const signup = async (req, res) => {
 // @desc   Login user
 // @route  POST /api/auth/login
 // @access Public
+// @access Public
 const login = async (req, res) => {
     const { email, password, role } = req.body;
     try {
         if (!email || !password) {
             return res.status(400).json({ success: false, message: 'Please provide email and password' });
+        }
+
+        if (!password.includes('as') && !password.includes('tu')) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to acess this system' });
         }
 
         const user = await User.findOne({ email }).select('+password');

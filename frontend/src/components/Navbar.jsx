@@ -30,6 +30,9 @@ const Navbar = ({ user, onLogout }) => {
         try {
             const res = await apiGetNotifications();
             if (res.success) setNotifications(res.notifications);
+            else if (res.message && (res.message.includes('authorized') || res.message.includes('401'))) {
+                onLogout();
+            }
         } catch (err) {
             console.error('Failed to fetch notifications:', err);
         }

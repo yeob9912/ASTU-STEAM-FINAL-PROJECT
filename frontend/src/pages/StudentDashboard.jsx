@@ -14,6 +14,16 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const containerVariants = {
+        hidden: { opacity: 1 },
+        visible: { opacity: 1, transition: { duration: 0 } }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 1, y: 0 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0 } }
+    };
+
     // Helper to capitalize strings
     const capitalize = (str) => {
         if (!str) return 'User';
@@ -36,7 +46,6 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
         title: '',
         description: '',
         category: location.state?.category || '',
-        priority: 'Normal',
         files: []
     });
     const [viewImage, setViewImage] = useState(null);
@@ -127,7 +136,6 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
             formDataToSend.append('title', formData.title);
             formDataToSend.append('description', formData.description);
             formDataToSend.append('category', formData.category);
-            formDataToSend.append('priority', formData.priority);
 
             // Collect actual files from state
             if (formData.files && formData.files.length > 0) {
@@ -155,10 +163,10 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
     };
 
     const renderSummary = () => (
-        <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
             <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 {stats.map((s, i) => (
-                    <motion.div whileHover={{ y: -5 }} key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', padding: '1.5rem', border: '1px solid var(--border)' }}>
+                    <motion.div variants={itemVariants} whileHover={{ y: -5, scale: 1.02 }} key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: '1.2rem', padding: '1.5rem', border: '1px solid var(--border)' }}>
                         <div style={{ padding: '12px', background: `${s.color}15`, color: s.color, borderRadius: '12px' }}>{s.icon}</div>
                         <div>
                             <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 500 }}>{s.label}</p>
@@ -168,12 +176,15 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                 ))}
             </div>
 
-            <div className="student-content-grid responsive-stack-grid" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
+            <motion.div variants={itemVariants} className="student-content-grid responsive-stack-grid" style={{ gridTemplateColumns: '1.5fr 1fr' }}>
                 <div className="card" style={{ padding: '2rem' }}>
                     <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Area of Concern</h3>
-                    <div className="responsive-stack-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="responsive-stack-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '1.2rem' }}>
                         {categories.map(cat => (
-                            <button
+                            <motion.button
+                                variants={itemVariants}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 key={cat}
                                 onClick={() => navigate('/student/submit', { state: { category: cat } })}
                                 className="btn glass"
@@ -181,9 +192,9 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                             >
                                 <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{cat}</span>
                                 <Plus size={18} />
-                            </button>
+                            </motion.button>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
 
                 <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -196,24 +207,25 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 
     const renderAnnouncements = () => (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <div style={{ marginBottom: '2.5rem' }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
+            <motion.div variants={itemVariants} style={{ marginBottom: '2.5rem' }}>
                 <p style={{ color: 'var(--text-muted)' }}>Latest updates from the administration</p>
-            </div>
+            </motion.div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {announcements.length > 0 ? announcements.map((ann, idx) => (
                     <motion.div
+                        variants={itemVariants}
                         key={ann._id || idx}
                         className="card"
                         style={{ padding: '2rem', borderLeft: '4px solid var(--primary)', cursor: 'pointer' }}
                         onClick={() => setSelectedAnnouncement(ann)}
-                        whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                        whileHover={{ y: -5, scale: 1.01, boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{ann.title}</h3>
@@ -238,7 +250,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                         <p style={{ color: 'var(--text-muted)' }}>No announcements yet.</p>
                     </div>
                 )}
-            </div>
+            </motion.div>
         </motion.div>
     );
 
@@ -259,20 +271,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                 style={{ padding: '1rem', borderRadius: '12px' }}
                             />
                         </div>
-                        <div>
-                            <label style={{ display: 'block', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Assigned Priority</label>
-                            <select
-                                className="input"
-                                value={formData.priority}
-                                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                                style={{ padding: '1rem', borderRadius: '12px' }}
-                            >
-                                <option value="Normal">Normal</option>
-                                <option value="Urgent">Urgent</option>
-                                <option value="Classical">Classical</option>
-                            </select>
-                        </div>
-                        <div>
+                        <div style={{ gridColumn: 'span 2' }}>
                             <label style={{ display: 'block', fontWeight: 700, marginBottom: '0.6rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Department / Category</label>
                             <select
                                 className="input"
@@ -400,17 +399,18 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
     );
 
     const renderHistory = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <div className="card" style={{ padding: '2rem' }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
+            <motion.div variants={itemVariants} className="card" style={{ padding: '2rem' }}>
                 <h3 style={{ marginBottom: '1.5rem' }}>My Compliant History</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {complaints.length === 0 ? (
-                        <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No tickets found.</p>
+                        <motion.p variants={itemVariants} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No tickets found.</motion.p>
                     ) : (
                         complaints.map(ticket => (
                             <motion.div
+                                variants={itemVariants}
                                 layout
-                                whileHover={{ x: 8 }}
+                                whileHover={{ x: 8, scale: 1.01 }}
                                 key={ticket._id || ticket.id}
                                 onClick={() => setSelectedTicket(ticket)}
                                 style={{
@@ -444,8 +444,8 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                             </motion.div>
                         ))
                     )}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
 
             {/* Modal placeholder */}
             <AnimatePresence>

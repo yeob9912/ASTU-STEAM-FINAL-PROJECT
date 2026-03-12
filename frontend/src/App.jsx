@@ -5,7 +5,6 @@ import Signup from './pages/Signup';
 import StudentDashboard from './pages/StudentDashboard';
 import StaffDashboard from './pages/StaffDashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import Landing from './pages/Landing';
 import Chatbot from './components/Chatbot';
 import Navbar from './components/Navbar';
 import './index.css';
@@ -54,22 +53,30 @@ const RequireAuth = ({ user, children, role }) => {
 
 const MainContent = ({ user, setUser, onLogout }) => {
   const location = useLocation();
-  const isHub = location.pathname === '/';
   const isAuth = location.pathname === '/login' || location.pathname === '/signup';
+
+  const getDashboardPath = (role) => {
+    switch(role) {
+      case 'student': return '/student';
+      case 'staff': return '/staff';
+      case 'admin': return '/admin';
+      default: return '/login';
+    }
+  };
 
   return (
     <div className="app-container">
-      {/* Hide specific UI elements on Hub and Auth pages */}
-      {!isHub && !isAuth && <Navbar user={user} onLogout={onLogout} />}
+      {/* Hide specific UI elements on Auth pages */}
+      {!isAuth && <Navbar user={user} onLogout={onLogout} />}
 
-      <main className={isHub ? "landing-hub-view" : "main-content"}>
+      <main className="main-content">
         <Routes>
           {/* Public Auth Routes */}
           <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login onLogin={setUser} />} />
           <Route path="/signup" element={user ? <Navigate to="/" replace /> : <Signup onSignup={setUser} />} />
 
           {/* Protected Routes */}
-          <Route path="/" element={<RequireAuth user={user}><Landing user={user} onLogout={onLogout} /></RequireAuth>} />
+          <Route path="/" element={<Navigate to={user ? getDashboardPath(user.role) : "/login"} replace />} />
 
           <Route path="/student/*" element={<RequireAuth user={user} role="student"><StudentDashboard user={user} setUser={setUser} onLogout={onLogout} /></RequireAuth>} />
           <Route path="/staff/*" element={<RequireAuth user={user} role="staff"><StaffDashboard user={user} setUser={setUser} onLogout={onLogout} /></RequireAuth>} />
@@ -80,7 +87,7 @@ const MainContent = ({ user, setUser, onLogout }) => {
       </main>
 
       {/* Conditional Chatbot */}
-      {user?.role === 'student' && !isHub && !isAuth && <Chatbot />}
+      {user?.role === 'student' && !isAuth && <Chatbot />}
     </div>
   );
 };

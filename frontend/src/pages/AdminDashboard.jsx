@@ -50,6 +50,16 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     const [notifications, setNotifications] = useState([]);
     const [viewImage, setViewImage] = useState(null);
 
+    const containerVariants = {
+        hidden: { opacity: 1 },
+        visible: { opacity: 1, transition: { duration: 0 } }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 1, y: 0 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0 } }
+    };
+
     // ── Departments list (Dynamically derived from categories) ──
     const DEPARTMENTS = useMemo(() => {
         // In the new model, category name is the department
@@ -168,9 +178,17 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
         }
     };
 
-    // Load all data on mount
     useEffect(() => {
+        const handleAuthError = (res) => {
+            if (res.message && (res.message.includes('authorized') || res.message.includes('401'))) {
+                onLogout();
+                return true;
+            }
+            return false;
+        };
+
         apiGetAdminStats().then(res => {
+            if (handleAuthError(res)) return;
             if (res.success) {
                 const { totalTickets, activeTickets, resolvedTickets, totalUsers, resolutionRate } = res.stats;
                 setStats([
@@ -183,6 +201,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
             }
         });
         apiGetAllTickets().then(res => {
+            if (handleAuthError(res)) return;
             if (res.success) {
                 setComplaints(res.tickets);
                 if (location.state?.openTicketId) {
@@ -196,10 +215,22 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 }
             }
         });
-        apiGetAllUsers().then(res => { if (res.success) setUsers(res.users); });
-        apiGetCategories().then(res => { if (res.success) setCategories(res.categories); });
-        apiGetAnnouncements().then(res => { if (res.success) setAnnouncements(res.announcements); });
-        apiGetNotifications().then(res => { if (res.success) setNotifications(res.notifications); });
+        apiGetAllUsers().then(res => {
+            if (handleAuthError(res)) return;
+            if (res.success) setUsers(res.users);
+        });
+        apiGetCategories().then(res => {
+            if (handleAuthError(res)) return;
+            if (res.success) setCategories(res.categories);
+        });
+        apiGetAnnouncements().then(res => {
+            if (handleAuthError(res)) return;
+            if (res.success) setAnnouncements(res.announcements);
+        });
+        apiGetNotifications().then(res => {
+            if (handleAuthError(res)) return;
+            if (res.success) setNotifications(res.notifications);
+        });
     }, []);
 
     const filteredComplaints = useMemo(() => {
@@ -279,11 +310,11 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
 
 
     const renderOverview = () => (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="overview-container">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="overview-container">
             {/* Main stats row */}
             <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.2rem', marginBottom: '1.5rem' }}>
                 {stats.map((s, i) => (
-                    <motion.div whileHover={{ scale: 1.01 }} key={i} className="card" style={{ padding: '0.8rem 1rem', border: '1px solid var(--border)' }}>
+                    <motion.div variants={itemVariants} whileHover={{ y: -5, scale: 1.02 }} key={i} className="card" style={{ padding: '0.8rem 1rem', border: '1px solid var(--border)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <div style={{ padding: '6px', background: `${s.color}15`, color: s.color, borderRadius: '8px' }}>{cloneElement(s.icon, { size: 16 })}</div>
                         </div>
@@ -301,7 +332,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     { label: 'In Progress', value: inProgressComplaints, color: '#f59e0b', bg: '#fffbeb', sub: `${pct(inProgressComplaints)}% of total` },
                     { label: 'Resolved', value: resolvedComplaints, color: '#10b981', bg: '#f0fdf4', sub: `${pct(resolvedComplaints)}% of total` },
                 ].map((stat, i) => (
-                    <motion.div key={i} whileHover={{ y: -2 }} className="card" style={{ padding: '1rem', border: `1px solid ${stat.color}30`, background: stat.bg }}>
+                    <motion.div variants={itemVariants} key={i} whileHover={{ y: -5, scale: 1.02 }} className="card" style={{ padding: '1rem', border: `1px solid ${stat.color}30`, background: stat.bg }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 700, color: stat.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{stat.label}</p>
@@ -328,11 +359,11 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 ))}
             </div>
 
-            <div className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <motion.div variants={itemVariants} className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2.5rem' }}>
 
                 <div className="card">
                     <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>By Department</h3>
-                    <div style={{ height: '260px' }}>
+                    <div style={{ height: '260px', width: '100%', position: 'relative' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie data={categoryData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
@@ -356,15 +387,15 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                         ))}
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 
 
     const renderComplaints = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-                <div style={{ position: 'relative', width: '300px' }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="card">
+            <div className="admin-controls-row">
+                <div className="admin-search-container">
                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                     <input
                         className="input"
@@ -374,17 +405,17 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="admin-filter-container">
                     <select className="input" style={{ width: 'auto' }}>
                         <option>All Status</option>
                         <option>Open</option>
                         <option>In Progress</option>
                         <option>Resolved</option>
                     </select>
-                    <button className="btn glass"><Filter size={18} /> Filter</button>
+                    <button className="btn glass admin-btn-sm"><Filter size={18} /> <span className="desk-only">Filter</span></button>
                 </div>
             </div>
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-container">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
                     <thead>
                         <tr style={{ color: 'var(--text-muted)', fontSize: '0.75rem', borderBottom: '1px solid var(--border)' }}>
@@ -396,9 +427,9 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             <th style={{ padding: '0.75rem', textAlign: 'right' }}>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                         {filteredComplaints.map((c) => (
-                            <tr key={c._id || c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                            <motion.tr variants={itemVariants} layout whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }} key={c._id || c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                                 <td style={{ padding: '0.75rem', fontWeight: 600, fontSize: '0.85rem' }}>{c.ticketId || c._id || c.id}</td>
                                 <td style={{ padding: '0.75rem' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.title}</div>
@@ -486,16 +517,16 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                         </button>
                                     </div>
                                 </td>
-                            </tr>
+                            </motion.tr>
                         ))}
-                    </tbody>
+                    </motion.tbody>
                 </table>
             </div>
         </motion.div>
     );
 
     const renderUsers = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                 <div style={{ position: 'relative', width: '300px' }}>
                     <Search size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
@@ -514,7 +545,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     <UserPlus size={18} /> Add User
                 </button>
             </div>
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-container">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
                     <thead>
                         <tr style={{ color: 'var(--text-muted)', fontSize: '0.75rem', borderBottom: '1px solid var(--border)' }}>
@@ -525,9 +556,9 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             <th style={{ padding: '0.75rem', textAlign: 'right' }}>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                         {filteredUsers.map((u) => (
-                            <tr key={u._id || u.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                            <motion.tr variants={itemVariants} layout whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }} key={u._id || u.id} style={{ borderBottom: '1px solid #f8fafc' }}>
                                 <td style={{ padding: '0.75rem' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.name}</div>
                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{u.email}</div>
@@ -579,28 +610,28 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                         </button>
                                     </div>
                                 </td>
-                            </tr>
+                            </motion.tr>
                         ))}
-                    </tbody>
+                    </motion.tbody>
                 </table>
             </div>
         </motion.div>
     );
 
     const renderCategories = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="card">
+            <div className="admin-section-header">
                 <h3>System Categories</h3>
                 <button
-                    className="btn btn-primary"
+                    className="btn btn-primary admin-btn-sm"
                     onClick={() => { setEditingEntity(null); setShowCategoryModal(true); }}
                 >
                     <Plus size={18} /> New Category
                 </button>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+            <motion.div variants={containerVariants} initial="hidden" animate="visible" className="admin-categories-grid">
                 {categories.map((cat, i) => (
-                    <div key={cat._id || i} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', border: '1px solid var(--border)', position: 'relative' }}>
+                    <motion.div variants={itemVariants} whileHover={{ y: -5, scale: 1.01 }} key={cat._id || i} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', border: '1px solid var(--border)', position: 'relative' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{typeof cat === 'string' ? cat : cat.name}</h4>
@@ -627,15 +658,15 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             </div>
                         </div>
                         {cat.description && <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>{cat.description}</p>}
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
         </motion.div>
     );
 
     const renderAnnouncements = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
-            <div className="card" style={{ padding: '1.2rem' }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem' }}>
+            <motion.div variants={itemVariants} className="card" style={{ padding: '1.2rem' }}>
                 <h3 style={{ marginBottom: '1.2rem', fontSize: '1rem' }}>Compose Announcement</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     <div>
@@ -676,13 +707,14 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                         <Send size={16} /> Broadcast Message
                     </button>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="card" style={{ padding: '1.2rem' }}>
+            <motion.div variants={itemVariants} className="card" style={{ padding: '1.2rem' }}>
                 <h3 style={{ marginBottom: '1.2rem', fontSize: '1rem' }}>Broadcast History</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.80rem' }}>
+                <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '0.80rem' }}>
                     {announcements.map(a => (
                         <motion.div
+                            variants={itemVariants}
                             key={a._id || a.id}
                             style={{ padding: '1.2rem', border: '1px solid var(--border)', borderRadius: '16px', background: '#f8fafc', cursor: 'pointer' }}
                             onClick={() => setSelectedAnnouncement(a)}
@@ -725,13 +757,13 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             </div>
                         </motion.div>
                     ))}
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </motion.div>
     );
 
     const renderAnalytics = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div variants={containerVariants} initial="hidden" animate="visible">
 
             {/* Summary stat cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -741,7 +773,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     { label: 'In Progress', value: inProgressComplaints, color: '#f59e0b', pct: pct(inProgressComplaints) },
                     { label: 'Resolved', value: resolvedComplaints, color: '#10b981', pct: pct(resolvedComplaints) },
                 ].map((s, i) => (
-                    <motion.div key={i} whileHover={{ y: -3 }} className="card" style={{ padding: '1.2rem', border: `2px solid ${s.color}20` }}>
+                    <motion.div variants={itemVariants} key={i} whileHover={{ y: -5, scale: 1.02 }} className="card" style={{ padding: '1.2rem', border: `2px solid ${s.color}20` }}>
                         <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 700, color: s.color, textTransform: 'uppercase' }}>{s.label}</p>
                         <h2 style={{ margin: '0.4rem 0 0.2rem 0', fontSize: '2.2rem', fontWeight: 900, color: s.color }}>{s.value}</h2>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -749,7 +781,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${s.pct}%` }}
-                                    transition={{ duration: 0.9, ease: 'easeOut', delay: i * 0.1 }}
+                                    transition={{ duration: 0, delay: 0 }}
                                     style={{ height: '100%', background: s.color, borderRadius: '3px' }}
                                 />
                             </div>
@@ -769,15 +801,15 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 {departmentStats.length === 0 ? (
                     <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0' }}>No complaints yet.</p>
                 ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {departmentStats.map((dept, i) => (
-                            <div key={dept.name} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                            <motion.div variants={itemVariants} whileHover={{ scale: 1.01, x: 2 }} key={dept.name} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: COLORS[i % COLORS.length] }} />
                                         <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{dept.name}</span>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', fontWeight: 700 }}>
+                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.75rem', fontWeight: 700, flexWrap: 'wrap' }}>
                                         <span style={{ color: '#ef4444' }}>{dept.open} Open</span>
                                         <span style={{ color: '#f59e0b' }}>{dept.inProgress} In Progress</span>
                                         <span style={{ color: '#10b981' }}>{dept.resolved} Resolved</span>
@@ -789,34 +821,34 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: `${dept.total === 0 ? 0 : Math.round(dept.open / dept.total * 100)}%` }}
-                                        transition={{ duration: 0.7, ease: 'easeOut', delay: i * 0.05 }}
+                                        transition={{ duration: 0, delay: 0 }}
                                         style={{ height: '100%', background: '#ef4444' }}
                                     />
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: `${dept.total === 0 ? 0 : Math.round(dept.inProgress / dept.total * 100)}%` }}
-                                        transition={{ duration: 0.7, ease: 'easeOut', delay: i * 0.05 + 0.1 }}
+                                        transition={{ duration: 0, delay: 0 }}
                                         style={{ height: '100%', background: '#f59e0b' }}
                                     />
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: `${dept.total === 0 ? 0 : Math.round(dept.resolved / dept.total * 100)}%` }}
-                                        transition={{ duration: 0.7, ease: 'easeOut', delay: i * 0.05 + 0.2 }}
+                                        transition={{ duration: 0, delay: 0 }}
                                         style={{ height: '100%', background: '#10b981' }}
                                     />
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 )}
             </div>
 
             {/* Charts row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                 {/* Department totals bar chart */}
                 <div className="card">
                     <h3 style={{ fontSize: '0.9rem', marginBottom: '1.2rem' }}>Complaints per Department</h3>
-                    <div style={{ height: '260px' }}>
+                    <div style={{ height: '260px', width: '100%', position: 'relative' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={departmentStats} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
@@ -834,8 +866,8 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 {/* Status distribution pie */}
                 <div className="card">
                     <h3 style={{ fontSize: '0.9rem', marginBottom: '1.2rem' }}>Status Distribution</h3>
-                    <div style={{ height: '200px' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div style={{ height: '200px', width: '100%', position: 'relative', minWidth: 0 }}>
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                             <PieChart>
                                 <Pie
                                     data={[
@@ -853,7 +885,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))', gap: '0.5rem', marginTop: '0.5rem' }}>
                         {[
                             { label: 'Open', value: openComplaints, color: '#ef4444' },
                             { label: 'In Progress', value: inProgressComplaints, color: '#f59e0b' },
@@ -885,27 +917,27 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     // Role-Based Guard (moved after hooks to follow Rules of Hooks)
 
     const renderKnowledgeBase = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="card">
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) minmax(300px, 1fr)', gap: '2rem', minHeight: '400px' }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="admin-kb-section-wrapper">
+            <div className="admin-kb-grid">
                 {/* Left side: Upload */}
-                <div style={{ padding: '1rem', textAlign: 'center' }}>
-                    <div style={{ background: '#f8fafc', padding: '3rem', borderRadius: '24px', border: '2px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-                        <div style={{ width: '80px', height: '80px', background: '#2563eb10', color: 'var(--primary)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="admin-kb-left">
+                    <div className="admin-kb-upload-box">
+                        <div className="admin-kb-upload-icon-container">
                             <FileUp size={40} />
                         </div>
-                        <div>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>Expand Knowledge Base</h2>
-                            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Upload documents to help the AI assistant answer campus queries.</p>
+                        <div style={{ textAlign: 'center' }}>
+                            <h2 className="admin-kb-title">Expand Knowledge Base</h2>
+                            <p className="admin-kb-subtitle">Upload documents to help the AI assistant answer campus queries.</p>
                         </div>
 
                         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} color="#10b981" /> PDF Support</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} color="#10b981" /> Text Files</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} color="#10b981" /> Auto-Chunking</span>
+                            <div className="admin-kb-features">
+                                <span className="admin-kb-feature"><CheckCircle size={14} color="#10b981" /> PDF Support</span>
+                                <span className="admin-kb-feature"><CheckCircle size={14} color="#10b981" /> Text Files</span>
+                                <span className="admin-kb-feature"><CheckCircle size={14} color="#10b981" /> Auto-Chunking</span>
                             </div>
 
-                            <label className={`btn ${uploading ? 'disabled' : 'btn-primary'}`} style={{ alignSelf: 'center', padding: '0.8rem 2rem', cursor: uploading ? 'default' : 'pointer', display: 'flex', alignItems: 'center' }}>
+                            <label className={`btn ${uploading ? 'disabled' : 'btn-primary'} admin-kb-upload-btn`}>
                                 {uploading ? <div className="spinner-small" style={{ marginRight: '8px' }} /> : <Upload size={18} style={{ marginRight: '8px' }} />}
                                 {uploading ? 'Processing Document...' : 'Select File to Upload'}
                                 <input type="file" hidden accept=".pdf,.txt,.doc,.docx" onChange={handleFileUpload} disabled={uploading} />
@@ -916,24 +948,16 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                style={{
-                                    padding: '1rem',
-                                    borderRadius: '12px',
-                                    fontSize: '0.85rem',
-                                    width: '100%',
-                                    background: uploadStatus.type === 'success' ? '#def7ec' : uploadStatus.type === 'error' ? '#fde8e8' : '#e1effe',
-                                    color: uploadStatus.type === 'success' ? '#03543f' : uploadStatus.type === 'error' ? '#9b1c1c' : '#1e429f',
-                                    border: `1px solid ${uploadStatus.type === 'success' ? '#bcf0da' : uploadStatus.type === 'error' ? '#f8b4b4' : '#a4cafe'}`
-                                }}
+                                className={`admin-kb-status-alert status-${uploadStatus.type}`}
                             >
                                 {uploadStatus.message}
                             </motion.div>
                         )}
                     </div>
 
-                    <div style={{ marginTop: '2.5rem', textAlign: 'left' }}>
+                    <div className="admin-kb-tips">
                         <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem' }}>RAG Integration Tips</h4>
-                        <ul style={{ color: 'var(--text-muted)', fontSize: '0.85rem', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <ul className="admin-kb-tips-list">
                             <li>Ensure documents are text-searchable (not scanned images).</li>
                             <li>High-quality content leads to better AI responses.</li>
                             <li>Existing knowledge base will be appended with new data.</li>
@@ -943,35 +967,35 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 </div>
 
                 {/* Right Side: Uploaded Files List */}
-                <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', borderLeft: '1px solid var(--border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>Knowledge Base Files</h3>
-                        <div style={{ background: '#2563eb10', color: 'var(--primary)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 }}>
+                <div className="admin-kb-right">
+                    <div className="admin-kb-right-header">
+                        <h3 className="admin-kb-right-title">Knowledge Base Files</h3>
+                        <div className="admin-kb-file-count">
                             {kbFiles.length} files
                         </div>
                     </div>
 
-                    <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.8rem', paddingRight: '0.5rem' }}>
+                    <div className="admin-kb-files-list">
                         {loadingFiles ? (
                             <div className="spinner-small" style={{ alignSelf: 'center', margin: '2rem 0' }} />
                         ) : kbFiles.length > 0 ? (
                             kbFiles.map((file, i) => (
                                 <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border)', transition: 'all 0.2s', cursor: 'default' }}
+                                    className="admin-kb-file-card"
                                     whileHover={{ borderColor: 'var(--primary)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', overflow: 'hidden' }}>
-                                        <div style={{ background: 'white', border: '1px solid var(--border)', color: 'var(--primary)', padding: '10px', borderRadius: '10px' }}>
+                                    <div className="admin-kb-file-info">
+                                        <div className="admin-kb-file-icon">
                                             <Database size={20} />
                                         </div>
-                                        <div style={{ overflow: 'hidden' }}>
-                                            <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} title={file.fileName}>{file.fileName}</p>
+                                        <div style={{ overflow: 'hidden', flex: 1 }}>
+                                            <p className="admin-kb-file-name" title={file.fileName}>{file.fileName}</p>
                                             <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                {new Date(file.uploadedAt).toLocaleDateString()} • {file.chunkCount} semantic chunks
+                                                {new Date(file.uploadedAt).toLocaleDateString()} • {file.chunkCount} chunks
                                             </p>
                                         </div>
                                     </div>
-                                    <button onClick={() => handleDeleteKbFile(file.fileName)} className="btn btn-icon" style={{ color: '#ef4444', background: '#fee2e2', padding: '8px' }} title="Remove from Knowledge Base">
+                                    <button onClick={() => handleDeleteKbFile(file.fileName)} className="btn btn-icon admin-kb-delete-btn" title="Remove from Knowledge Base">
                                         <Trash2 size={16} />
                                     </button>
                                 </motion.div>
@@ -1001,7 +1025,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', background: '#f8fafc' }}>
+        <div className="admin-dashboard-layout">
 
             {/* Sidebar */}
             <aside className="desk-only" style={{
@@ -1046,7 +1070,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
             </aside>
 
             {/* Main Content */}
-            <main style={{ flex: 1, padding: '1rem 2rem', overflowY: 'auto' }}>
+            <main style={{ flex: 1, padding: '1rem 2rem', overflowY: 'auto', minWidth: 0 }}>
                 <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', textTransform: 'capitalize', margin: 0 }}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Lock, ArrowRight, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { apiLogin } from '../api';
 
@@ -9,12 +9,20 @@ const Login = ({ onLogin }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        if (!password.includes('as') && !password.includes('tu')) {
+            setError('You are not authorized to acess this system');
+            setLoading(false);
+            return;
+        }
+
         try {
             // Role selection removed - backend detects role from DB
             const res = await apiLogin({ email, password });
@@ -27,7 +35,13 @@ const Login = ({ onLogin }) => {
             localStorage.setItem('astu_token', res.token);
             localStorage.setItem('astu_user', JSON.stringify(res.user));
             onLogin(res.user);
-            navigate('/');
+            
+            const dashboardPaths = {
+                student: '/student',
+                staff: '/staff',
+                admin: '/admin'
+            };
+            navigate(dashboardPaths[res.user.role] || '/');
 
         } catch (err) {
             setError('Server error. Is the backend running?');
@@ -82,14 +96,21 @@ const Login = ({ onLogin }) => {
                     <div style={{ position: 'relative' }}>
                         <Lock size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder="Password"
                             className="input"
-                            style={{ paddingLeft: '45px' }}
+                            style={{ paddingLeft: '45px', paddingRight: '45px' }}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: 0 }}
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
 
                     {error && (

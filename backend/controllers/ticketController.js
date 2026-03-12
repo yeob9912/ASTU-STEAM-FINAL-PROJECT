@@ -178,8 +178,8 @@ const updateTicketStatus = async (req, res) => {
         }
 
         if (priority && priority !== ticket.priority) {
-            if (req.user.role !== 'admin') {
-                return res.status(403).json({ success: false, message: 'Only admins can change ticket priority' });
+            if (req.user.role !== 'admin' && req.user.role !== 'staff') {
+                return res.status(403).json({ success: false, message: 'Only admins and staff can change ticket priority' });
             }
             ticket.priority = priority;
             updateMsg += updateMsg ? `and priority changed to ${priority}. ` : `priority changed to ${priority}. `;
