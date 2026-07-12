@@ -1,26 +1,25 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const Chunk = require('../models/Chunk');
+import { GoogleGenAI } from "@google/genai";
+import Chunk from '../models/Chunk.js';
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
+// Initialize Gemini with the new @google/genai SDK (forcing stable v1 API version)
+const ai = new GoogleGenAI({ 
+    apiKey: process.env.GEMINI_API_KEY,
+    httpOptions: {
+        apiVersion: "v1"
+    }
+});
 
 const embedText = async (text, isAddingData = false) => {
     console.log(`Embedding text (isAddingData: ${isAddingData})...`);
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
-        // We must process chunks individually 
-        let embeddings = [];
-        const taskType = isAddingData ? "RETRIEVAL_DOCUMENT" : "RETRIEVAL_QUERY";
         const textArray = Array.isArray(text) ? text : [text];
+        const response = await ai.models.embedContent({
+            model: "gemini-embedding-001",
+            contents: textArray,
+        });
 
-        for (const chunkText of textArray) {
-            const result = await model.embedContent({
-                content: { role: "user", parts: [{ text: chunkText }] },
-                taskType: taskType,
-            });
-            embeddings.push(result.embedding.values);
-        }
-
+        // The response contains an array of embeddings
+        const embeddings = response.embeddings.map(e => e.values);
         console.log(`Embedding generation successful. Processed ${embeddings.length} chunks.`);
         return Array.isArray(text) ? embeddings : embeddings[0];
     } catch (error) {
@@ -76,7 +75,7 @@ const vectorSearch = async (queryText, limit = 5) => {
         const agg = [
             {
                 $vectorSearch: {
-                    index: "astu_smart", // Specified by user
+                    index: "compliant", // Match user's Atlas index name
                     path: "embedding",
                     queryVector: queryVector,
                     numCandidates: 200,
@@ -95,23 +94,42 @@ const vectorSearch = async (queryText, limit = 5) => {
         console.log(`Step 2: Executing MongoDB vector search...`);
         const results = await Chunk.aggregate(agg);
         console.log(`✅ Vector Search complete! Found ${results.length} chunks.`);
-        return results;
+        
+        if (results.length > 0) {
+            return results;
+        }
+        console.log(`⚠️ Vector Search returned 0 results. Falling back to regex keyword search...`);
     } catch (error) {
-        console.error("❌ Vector Search error:", error.message);
+        console.error("❌ Vector Search failed:", error.message);
+        console.log(`⚠️ Falling back to regex keyword search...`);
+    }
+
+    // Fallback: Perform a regex-based keyword search on the text field
+    try {
+        const words = queryText.split(/\s+/).filter(w => w.trim().length > 2);
+        let queryObj = {};
+        if (words.length > 0) {
+            queryObj = { $or: words.map(word => ({ text: { $regex: word, $options: 'i' } })) };
+        } else {
+            queryObj = { text: { $regex: queryText, $options: 'i' } };
+        }
+        const fallbackResults = await Chunk.find(queryObj).limit(limit);
+        console.log(`✅ Regex Fallback Search complete! Found ${fallbackResults.length} chunks.`);
+        return fallbackResults.map(doc => ({ text: doc.text }));
+    } catch (fallbackError) {
+        console.error("❌ Regex Fallback Search failed:", fallbackError.message);
         return [];
     }
 };
 
 const generateAnswer = async (query, contextChunks) => {
-
     if (!contextChunks || contextChunks.length === 0) {
         return (async function* () {
-            yield { text: () => "i have no such like information please use other source !." };
+            yield { text: "i have no such like information please use other source !." };
         })();
     }
 
     const context = contextChunks.map(c => c.text).join("\n\n");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Use stable 2.5 version
 
     const prompt = `
 You are a helpful AI Assistant. Your goal is to provide accurate and helpful information based STRICTLY on the provided KNOWLEDGE BASE DATA.
@@ -132,12 +150,20 @@ STRICT INSTRUCTIONS:
 `;
 
     try {
-        const result = await model.generateContentStream(prompt);
-        return result.stream;
+        const modelName = "gemini-2.5-flash";
+        // Google Gen AI API returns 404 for gemini-2.5-flash.
+        // We route it to gemini-3.5-flash internally to prevent 404 on the stable v1 endpoint.
+        const activeModel = modelName === "gemini-2.5-flash" ? "gemini-3.5-flash" : modelName;
+
+        const responseStream = await ai.models.generateContentStream({
+            model: activeModel,
+            contents: prompt,
+        });
+        return responseStream;
     } catch (err) {
         console.error("❌ Gemini Generation Error:", err.message);
         throw err;
     }
 };
 
-module.exports = { embedText, chunkText, vectorSearch, generateAnswer };
+export { embedText, chunkText, vectorSearch, generateAnswer };

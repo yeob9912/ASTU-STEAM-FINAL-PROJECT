@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
 // Protect routes — require valid JWT
 const protect = async (req, res, next) => {
@@ -38,4 +38,4 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { protect, authorize };
+export { protect, authorize };

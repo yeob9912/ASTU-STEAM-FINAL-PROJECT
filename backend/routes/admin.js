@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
-const {
+import { protect, authorize } from '../middleware/auth.js';
+import {
     getAllUsers, createUser, updateUser, deleteUser,
     getAnnouncements, createAnnouncement, deleteAnnouncement,
     getCategories, createCategory, updateCategory, deleteCategory,
     getAdminStats, uploadKnowledgeBase, getKnowledgeBaseFiles, deleteKnowledgeBaseFile
-} = require('../controllers/adminController');
-const multer = require('multer');
+} from '../controllers/adminController.js';
+import multer from 'multer';
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit for docs
@@ -38,4 +38,4 @@ router.post('/rag/upload', protect, authorize('admin'), upload.single('file'), u
 router.get('/rag/files', protect, authorize('admin'), getKnowledgeBaseFiles);
 router.delete('/rag/files/:filename', protect, authorize('admin'), deleteKnowledgeBaseFile);
 
-module.exports = router;
+export default router;

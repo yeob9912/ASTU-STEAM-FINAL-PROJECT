@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const chunkSchema = new mongoose.Schema({
     text: {
@@ -19,16 +19,17 @@ const chunkSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Vector Search Index should be created in MongoDB Atlas:
+// MongoDB Atlas Vector Search Index — paste this in Atlas → Search Indexes:
 // {
 //   "fields": [
 //     {
-//       "numDimensions": 768,
+//       "type": "vector",
+//       "numDimensions": 3072,
 //       "path": "embedding",
-//       "similarity": "cosine",
-//       "type": "vector"
+//       "similarity": "cosine"
 //     }
 //   ]
 // }
 
-module.exports = mongoose.model('Chunk', chunkSchema, 'chunk');
+
+export default mongoose.model('Chunk', chunkSchema, 'chunk');

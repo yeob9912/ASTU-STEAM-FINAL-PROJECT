@@ -1,6 +1,7 @@
-const Ticket = require('../models/Ticket');
-const Notification = require('../models/Notification');
-const Category = require('../models/Category');
+import Ticket from '../models/Ticket.js';
+import Notification from '../models/Notification.js';
+import Category from '../models/Category.js';
+import User from '../models/User.js';
 
 // @desc   Create a new ticket (Student)
 // @route  POST /api/tickets
@@ -43,7 +44,6 @@ const createTicket = async (req, res) => {
 
         // ─── NOTIFY ADMINS & STAFF ──────────────────────────────────────────
         try {
-            const User = require('../models/User');
             // Notify all admins
             const admins = await User.find({ role: 'admin' });
             const adminNotifications = admins.map(admin => ({
@@ -209,7 +209,6 @@ const updateTicketStatus = async (req, res) => {
         await ticket.save();
 
         if (updateMsg) {
-            const User = require('../models/User');
 
             // 1. Notify student (Always)
             await Notification.create({
@@ -289,7 +288,6 @@ const addRemark = async (req, res) => {
 
         await ticket.save();
 
-        const User = require('../models/User');
         const roleStr = req.user.role === 'admin' ? 'Admin' : 'Staff';
 
         // 1. Notify Student (Always)
@@ -354,7 +352,6 @@ const updateRemark = async (req, res) => {
         remark.updatedAt = new Date();
         await ticket.save();
 
-        const User = require('../models/User');
         const roleStr = req.user.role === 'admin' ? 'Admin' : 'Staff';
 
         // Notify Student
@@ -427,7 +424,7 @@ const getStats = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     createTicket, getMyTickets, getDepartmentTickets, getAllTickets,
     getTicketById, updateTicketStatus, addRemark, updateRemark, deleteTicket, getStats
 };

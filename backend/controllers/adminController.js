@@ -1,11 +1,14 @@
-const User = require('../models/User');
-const Announcement = require('../models/Announcement');
-const Category = require('../models/Category');
-const Ticket = require('../models/Ticket');
-const mammoth = require('mammoth');
+import User from '../models/User.js';
+import Announcement from '../models/Announcement.js';
+import Category from '../models/Category.js';
+import Ticket from '../models/Ticket.js';
+import mammoth from 'mammoth';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const pdfParse = require('pdf-parse');
-const { chunkText, embedText } = require('../utils/rag');
-const Chunk = require('../models/Chunk');
+import { chunkText, embedText } from '../utils/rag.js';
+import Chunk from '../models/Chunk.js';
+import Notification from '../models/Notification.js';
 
 // ─── USERS ────────────────────────────────────────────────────────────────────
 
@@ -87,7 +90,6 @@ const updateUser = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
 
         // Notify user of profile update
-        const Notification = require('../models/Notification');
         await Notification.create({
             recipient: user._id,
             sender: req.user.id,
@@ -142,7 +144,6 @@ const createAnnouncement = async (req, res) => {
         });
 
         // Trigger Notifications for Target Audience
-        const Notification = require('../models/Notification');
         let recipientFilter = { _id: { $ne: req.user.id } }; // Exclude sender
         if (target === 'Students Only') recipientFilter.role = 'student';
         if (target === 'Staff Only') recipientFilter.role = 'staff';
@@ -176,7 +177,6 @@ const deleteAnnouncement = async (req, res) => {
         if (!announcement) return res.status(404).json({ success: false, message: 'Announcement not found' });
 
         // Trigger Deletion Notifications for Target Audience
-        const Notification = require('../models/Notification');
         let recipientFilter = { _id: { $ne: req.user.id } }; // Exclude sender
         if (announcement.target === 'Students Only') recipientFilter.role = 'student';
         if (announcement.target === 'Staff Only') recipientFilter.role = 'staff';
@@ -357,8 +357,7 @@ const uploadKnowledgeBase = async (req, res) => {
         console.log(`Analyzing file type: ${req.file.mimetype} for file: ${req.file.originalname}`);
 
         if (req.file.mimetype === 'application/pdf') {
-            const parser = new pdfParse.PDFParse({ data: req.file.buffer });
-            const result = await parser.getText();
+            const result = await pdfParse(req.file.buffer);
             content = result.text;
         } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || req.file.originalname.endsWith('.docx')) {
             const result = await mammoth.extractRawText({ buffer: req.file.buffer });
@@ -455,7 +454,7 @@ const deleteKnowledgeBaseFile = async (req, res) => {
     }
 };
 
-module.exports = {
+export {
     getAllUsers, createUser, updateUser, deleteUser,
     getAnnouncements, createAnnouncement, deleteAnnouncement,
     getCategories, createCategory, updateCategory, deleteCategory,

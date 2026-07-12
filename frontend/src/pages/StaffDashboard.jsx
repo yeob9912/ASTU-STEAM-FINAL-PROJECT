@@ -5,7 +5,7 @@ import {
     Inbox, CheckCircle, RefreshCcw, Search, MessageSquare,
     AlertCircle, ChevronDown, Filter, X, Save, Paperclip,
     Clock, Layout, MoreVertical, LogOut, User as UserIcon, Menu, Bell, Download, FileText,
-    Camera, Settings, Trash2, Briefcase
+    Camera, Settings, Trash2, Briefcase, Sun, Moon
 } from 'lucide-react';
 import {
     apiGetDepartmentTickets, apiUpdateTicketStatus, apiAddRemark,
@@ -13,8 +13,9 @@ import {
     apiGetAnnouncements, apiDeleteProfilePicture, apiGetCategories, apiChangePassword,
     apiUpdateRemark, SERVER_URL
 } from '../api';
+import Avatar from '../components/Avatar';
 
-const StaffDashboard = ({ user, setUser, onLogout }) => {
+const StaffDashboard = ({ user, setUser, onLogout, theme, toggleTheme }) => {
     const location = useLocation();
     const [complaints, setComplaints] = useState([]);
     
@@ -168,11 +169,19 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
         };
         const handleViewChange = (e) => {
             if (e.detail && e.detail.view) {
-                setView(e.detail.view);
+                setView(e.detail.view === 'profile' ? 'settings' : e.detail.view);
             }
         };
         window.addEventListener('staff-filter-change', handleFilterChange);
         window.addEventListener('staff-view-change', handleViewChange);
+
+        // Check path on mount for /profile or /settings
+        const pathParts = window.location.pathname.split('/');
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart === 'profile' || lastPart === 'settings') {
+            setView('settings');
+        }
+
         return () => {
             window.removeEventListener('staff-filter-change', handleFilterChange);
             window.removeEventListener('staff-view-change', handleViewChange);
@@ -207,12 +216,36 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', background: '#f8fafc' }}>
+        <div
+            className="staff-dashboard-layout"
+            style={{
+                display: 'flex',
+                height: 'calc(100vh - 64px)',
+                overflow: 'hidden',
+                backgroundImage: 'url(/images.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed'
+            }}
+        >
+            {/* Dark/Light overlay on bg image */}
+            <div style={{
+                position: 'fixed', inset: 0, top: '64px', zIndex: 0,
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(2px)',
+                pointerEvents: 'none'
+            }} />
+
             {/* Sidebar */}
             <aside className="dashboard-sidebar desk-only" style={{
-                width: '180px', background: 'white', borderRight: '1px solid #f1f5f9',
+                width: '180px',
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRight: '1px solid var(--glass-border)',
                 padding: '1rem 0.5rem', display: 'flex', flexDirection: 'column',
-                position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', zIndex: 100
+                position: 'fixed', top: '64px', left: 0, bottom: 0, zIndex: 100,
+                overflowY: 'auto'
             }}>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '1.5rem' }}>
                     <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1.5px', paddingLeft: '0.8rem', marginBottom: '0.3rem' }}>QUEUE FILTERS</p>
@@ -252,6 +285,8 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                         );
                     })}
 
+                    <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'var(--text-muted)', letterSpacing: '1.5px', paddingLeft: '0.8rem', marginTop: '1.5rem', marginBottom: '0.3rem' }}>OTHER PAGES</p>
+
                     <button
                         onClick={() => setView('announcements')}
                         style={{
@@ -277,25 +312,44 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                             width: '100%', textAlign: 'left', fontFamily: 'inherit', fontSize: '0.85rem'
                         }}
                     >
-                        <Settings size={18} /> Account Settings
+                        <UserIcon size={18} /> Profile
                     </button>
 
                     {/* Main buttons footer could go here */}
                 </div>
 
-                <button onClick={onLogout} className="btn" style={{ background: '#fecaca', color: '#b91c1c', marginTop: 'auto', width: '100%', justifyContent: 'center', padding: '0.6rem', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                    <LogOut size={16} /> Logout
-                </button>
+                <div style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {/* Dark mode toggle */}
+                    {toggleTheme && (
+                        <button
+                            onClick={toggleTheme}
+                            className="btn glass"
+                            style={{
+                                width: '100%', justifyContent: 'center', padding: '0.6rem',
+                                fontSize: '0.85rem',
+                                display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                border: '1px solid var(--glass-border)', borderRadius: '10px'
+                            }}
+                        >
+                            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                        </button>
+                    )}
+
+                    <button onClick={onLogout} className="btn" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', width: '100%', justifyContent: 'center', padding: '0.6rem', fontSize: '0.85rem', marginBottom: '1rem' }}>
+                        <LogOut size={16} /> Logout
+                    </button>
+                </div>
             </aside>
 
             {/* Content Area */}
-            <main style={{ flex: 1, padding: '3.5rem', overflowY: 'auto' }}>
+            <main style={{ flex: 1, padding: '3.5rem', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
                 <header style={{ marginBottom: '3.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                        <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1px', color: '#1e293b', margin: 0, textTransform: 'capitalize' }}>
+                        <h1 style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-1px', color: 'var(--text-main)', margin: 0, textTransform: 'capitalize' }}>
                             {view === 'settings' ? 'Account Settings' : view === 'announcements' ? 'Announcements' : `Welcome, ${user?.name?.split(' ')[0]}`}
                         </h1>
-                        <p style={{ color: '#64748b', fontSize: '1.1rem', marginTop: '0.5rem' }}>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem' }}>
                             {view === 'settings' ? 'Manage your personal profile and security' : view === 'announcements' ? 'Broadcasts from the administration' : `Management for ${userDeptsDisplay} department support.`}
                         </p>
                     </div>
@@ -371,7 +425,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                             </p>
                                         </div>
 
-                                        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '20px', border: '1px solid var(--border)', lineHeight: 1.8, fontSize: '1.1rem', color: 'var(--text-main)', whiteSpace: 'pre-wrap' }}>
+                                        <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '20px', border: '1px solid var(--border)', lineHeight: 1.8, fontSize: '1.1rem', color: 'var(--text-main)', whiteSpace: 'pre-wrap' }}>
                                             {selectedAnnouncement.text || selectedAnnouncement.content}
                                         </div>
 
@@ -403,7 +457,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
 
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0' }}>
-                                <thead style={{ background: '#f8fafc', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                <thead style={{ background: 'var(--bg-card)', color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                     <tr>
                                         <th style={{ padding: '1.2rem 1.5rem' }}>Student Details</th>
                                         <th style={{ padding: '1.2rem 1.5rem' }}>Ticket Info</th>
@@ -418,8 +472,8 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                             layout
                                             key={c._id || c.id}
                                             onClick={() => { setSelectedTicket(c); setModalMode('view'); setRemarkText(''); }}
-                                            style={{ borderBottom: '1px solid var(--border)', background: 'white', cursor: 'pointer' }}
-                                            whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }}
+                                            style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-card)', cursor: 'pointer' }}
+                                            whileHover={{ background: 'var(--bg-main)', scale: 1.002, x: 2 }}
                                         >
                                             <td style={{ padding: '1.5rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -575,7 +629,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                             className="card" style={{ width: '100%', maxWidth: '600px', cursor: 'default', maxHeight: '90vh', overflowY: 'auto', padding: 0 }}
                             onClick={e => e.stopPropagation()}
                         >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, background: 'white', zIndex: 10 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-card)', zIndex: 10 }}>
                                 <div>
                                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.3rem' }}>Ticket {selectedTicket.ticketId || selectedTicket._id || selectedTicket.id}</div>
                                     <h3 style={{ margin: 0 }}>{selectedTicket.title}</h3>
@@ -588,7 +642,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                     <div>
                                         <section style={{ marginBottom: '2rem' }}>
                                             <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.8rem', textTransform: 'uppercase' }}>Issue Description</p>
-                                            <div style={{ color: 'var(--text-main)', lineHeight: 1.6, background: '#f8fafc', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '1rem' }}>
+                                            <div style={{ color: 'var(--text-main)', lineHeight: 1.6, background: 'var(--bg-card)', padding: '1.2rem', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '1rem' }}>
                                                 {selectedTicket.description}
                                             </div>
                                         </section>
@@ -615,7 +669,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                <div style={{ width: '100%', height: '120px', background: '#f8fafc', borderRadius: '12px', marginBottom: '0.8rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => openFile(file.url)}>
+                                                                <div style={{ width: '100%', height: '120px', background: 'var(--bg-main)', borderRadius: '12px', marginBottom: '0.8rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => openFile(file.url)}>
                                                                     <FileText size={32} style={{ opacity: 0.2 }} />
                                                                     <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>DOCUMENT</span>
                                                                 </div>
@@ -674,7 +728,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
 
                                     <div>
                                         {modalMode === 'edit' ? (
-                                            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)', position: 'sticky', top: '0' }}>
+                                            <div style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
                                                 <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1.2rem', textTransform: 'uppercase' }}>Update Ticket</p>
                                                 <form onSubmit={handleCombinedUpdate}>
                                                     <div style={{ marginBottom: '1.2rem' }}>
@@ -683,7 +737,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             className="input"
                                                             value={tempStatus}
                                                             onChange={(e) => setTempStatus(e.target.value)}
-                                                            style={{ background: 'white', marginBottom: '1rem', width: '100%' }}
+                                                            style={{ background: 'var(--bg-main)', color: 'var(--text-main)', marginBottom: '1rem', width: '100%' }}
                                                         >
                                                             <option value="Open">Open</option>
                                                             <option value="In Progress">In Progress</option>
@@ -695,7 +749,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             className="input"
                                                             value={tempPriority}
                                                             onChange={(e) => setTempPriority(e.target.value)}
-                                                            style={{ background: 'white', marginBottom: '1rem', width: '100%' }}
+                                                            style={{ background: 'var(--bg-main)', color: 'var(--text-main)', marginBottom: '1rem', width: '100%' }}
                                                         >
                                                             <option value="Normal">Normal</option>
                                                             <option value="Urgent">Urgent</option>
@@ -707,7 +761,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                             className="input"
                                                             placeholder="Add progress note or resolution steps..."
                                                             rows="5"
-                                                            style={{ height: 'auto', background: 'white' }}
+                                                            style={{ height: 'auto', background: 'var(--bg-main)', color: 'var(--text-main)' }}
                                                             value={remarkText}
                                                             onChange={(e) => setRemarkText(e.target.value)}
                                                         />
@@ -733,7 +787,7 @@ const StaffDashboard = ({ user, setUser, onLogout }) => {
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)', position: 'sticky', top: '0' }}>
+                                            <div style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: '16px', border: '1px solid var(--border)' }}>
                                                 <div style={{ marginBottom: '2rem' }}>
                                                     <p style={{ margin: '0 0 0.4rem 0', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Responsible Department</p>
                                                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '6px 12px', background: 'rgba(37, 99, 235, 0.1)', color: 'var(--primary)', borderRadius: '8px', fontWeight: 700, fontSize: '0.9rem' }}>
@@ -874,15 +928,26 @@ const StaffSettingsView = ({ user, setUser }) => {
         ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
+    // Safely get first letter of name
+    const nameInitial = (user?.name || '').trim().charAt(0).toUpperCase() || 'U';
+
     return (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
             <div className="card" style={{ maxWidth: '650px', margin: '0 auto', padding: '3rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <div style={{ position: 'relative', width: '130px', height: '130px', margin: '0 auto 1.5rem auto' }}>
-                        <div style={{ width: '100%', height: '100%', borderRadius: '40px', background: '#f8fafc', overflow: 'hidden', border: '4px solid white', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)' }}>
-                            {profilePhotoUrl ? <img src={profilePhotoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary)', background: '#eff6ff' }}><UserIcon size={56} /></div>}
+                        <div
+                            onClick={() => profileInputRef.current?.click()}
+                            style={{
+                                width: '130px', height: '130px', borderRadius: '50%', overflow: 'hidden',
+                                border: '4px solid var(--bg-card)', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)',
+                                cursor: 'pointer', transition: 'all 0.2s ease'
+                            }}
+                            title="Click to upload profile picture"
+                        >
+                            <Avatar user={user} size={130} borderRadius="50%" fontSize="3.5rem" />
                         </div>
-                        <button onClick={() => profileInputRef.current?.click()} className="btn-primary" style={{ position: 'absolute', bottom: '0', right: '0', width: '44px', height: '44px', borderRadius: '15px', border: '4px solid white', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)' }}><Camera size={20} /></button>
+                        <button onClick={() => profileInputRef.current?.click()} className="btn-primary" style={{ position: 'absolute', bottom: '0', right: '0', width: '44px', height: '44px', borderRadius: '50%', border: '4px solid var(--bg-card)', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)' }}><Camera size={20} /></button>
                         {user?.profilePicture && (
                             <button
                                 onClick={handleDeletePhoto}
@@ -891,7 +956,7 @@ const StaffSettingsView = ({ user, setUser }) => {
                                 title="Delete Photo"
                                 style={{
                                     position: 'absolute', bottom: '0', left: '-10px',
-                                    width: '40px', height: '40px', borderRadius: '12px',
+                                    width: '40px', height: '40px', borderRadius: '50%',
                                     border: '4px solid white', display: 'flex', justifyContent: 'center',
                                     alignItems: 'center', cursor: 'pointer', background: 'var(--danger)',
                                     color: 'white', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)'
@@ -909,16 +974,16 @@ const StaffSettingsView = ({ user, setUser }) => {
                 <form onSubmit={handleInfoUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div style={{
-                            padding: '1.5rem', background: 'white', borderRadius: '16px',
-                            border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                            padding: '1.5rem', background: 'var(--bg-card)', borderRadius: '16px',
+                            border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                             display: 'flex', flexDirection: 'column', gap: '0.5rem'
                         }}>
                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Full Name</label>
                             <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', textTransform: 'capitalize' }}>{user?.name || 'Staff Member'}</div>
                         </div>
                         <div style={{
-                            padding: '1.5rem', background: 'white', borderRadius: '16px',
-                            border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                            padding: '1.5rem', background: 'var(--bg-card)', borderRadius: '16px',
+                            border: '1px solid var(--border)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                             display: 'flex', flexDirection: 'column', gap: '0.5rem'
                         }}>
                             <label style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Assigned Department</label>
@@ -932,7 +997,7 @@ const StaffSettingsView = ({ user, setUser }) => {
                         <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled />
                     </div>
 
-                    {updateMsg && <div style={{ padding: '1rem', borderRadius: '12px', textAlign: 'center', fontWeight: 600, background: updateMsg.includes('success') ? '#f0fdf4' : '#fef2f2', color: updateMsg.includes('success') ? '#15803d' : '#b91c1c' }}>{updateMsg}</div>}
+                    {updateMsg && <div style={{ padding: '1rem', borderRadius: '12px', textAlign: 'center', fontWeight: 600, background: updateMsg.includes('success') ? 'var(--primary)15' : '#fef2f2', color: updateMsg.includes('success') ? 'var(--primary)' : '#b91c1c', border: `1px solid ${updateMsg.includes('success') ? 'var(--primary)30' : '#fca5a5'}` }}>{updateMsg}</div>}
                 </form>
 
                 {/* Change Password Section */}

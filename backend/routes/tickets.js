@@ -1,12 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
-const {
+import { protect, authorize } from '../middleware/auth.js';
+import {
     createTicket, getMyTickets, getDepartmentTickets, getAllTickets,
     getTicketById, updateTicketStatus, addRemark, updateRemark, deleteTicket, getStats
-} = require('../controllers/ticketController');
+} from '../controllers/ticketController.js';
 
-const upload = require('../middleware/uploadMiddleware');
+import upload from '../middleware/uploadMiddleware.js';
 
 // Stats (admin)
 router.get('/stats', protect, authorize('admin'), getStats);
@@ -26,4 +26,4 @@ router.post('/:id/remarks', protect, authorize('admin', 'staff'), addRemark);
 router.put('/:id/remarks/:remarkId', protect, authorize('admin', 'staff'), updateRemark);
 router.delete('/:id', protect, authorize('admin'), deleteTicket);
 
-module.exports = router;
+export default router;

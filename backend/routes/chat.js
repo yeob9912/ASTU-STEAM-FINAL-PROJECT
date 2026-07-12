@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const { getChatHistory, sendMessage, deleteChat } = require('../controllers/chatController');
-const { protect } = require('../middleware/auth');
+import { getChatHistory, sendMessage, deleteChat } from '../controllers/chatController.js';
+import { protect } from '../middleware/auth.js';
 
 router.use(protect);
 
@@ -9,4 +9,4 @@ router.get('/', getChatHistory);
 router.post('/', sendMessage);
 router.delete('/:id', deleteChat);
 
-module.exports = router;
+export default router;

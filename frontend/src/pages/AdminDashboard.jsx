@@ -6,7 +6,7 @@ import {
     ArrowUpRight, LayoutDashboard, Settings, Bell, Grid,
     UserPlus, Edit, Trash2, Check, X, Search, Plus, Send, Clock,
     BarChart2, PieChart as PieChartIcon, Activity, User as UserIcon,
-    Camera, Save, Database, Upload, FileUp, Share2, RefreshCcw, MoreVertical
+    Camera, Save, Database, Upload, FileUp, Share2, RefreshCcw, MoreVertical, Sun, Moon
 } from 'lucide-react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -21,10 +21,11 @@ import {
     apiUploadKnowledgeBase, apiGetKnowledgeBaseFiles, apiDeleteKnowledgeBaseFile, apiChangePassword,
     SERVER_URL
 } from '../api';
+import Avatar from '../components/Avatar';
 
 // Redundant DEPARTMENTS removed
 
-const AdminDashboard = ({ user, setUser, onLogout }) => {
+const AdminDashboard = ({ user, setUser, theme, toggleTheme, onLogout }) => {
     const location = useLocation();
     const [activeSection, setActiveSection] = useState('overview');
 
@@ -266,7 +267,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
         { id: 'analytics', label: 'Analytics', icon: <BarChart2 size={20} /> },
         { id: 'announcements', label: 'Announcements', icon: <Bell size={20} /> },
         { id: 'knowledge-base', label: 'Knowledge Base', icon: <Database size={20} /> },
-        { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+        { id: 'settings', label: 'Profile', icon: <UserIcon size={20} /> },
     ];
 
     // --- Real-time computed analytics from actual complaints data ---
@@ -359,12 +360,12 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 ))}
             </div>
 
-            <motion.div variants={itemVariants} className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <motion.div variants={itemVariants} className="admin-charts-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2.5rem', minWidth: 0 }}>
 
-                <div className="card">
+                <div className="card" style={{ minWidth: 0 }}>
                     <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>By Department</h3>
-                    <div style={{ height: '260px', width: '100%', position: 'relative' }}>
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div style={{ height: '260px', width: '100%', position: 'relative', minWidth: 0 }}>
+                        <ResponsiveContainer width="99%" height="100%">
                             <PieChart>
                                 <Pie data={categoryData} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
                                     {categoryData.map((entry, index) => (
@@ -429,7 +430,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     </thead>
                     <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                         {filteredComplaints.map((c) => (
-                            <motion.tr variants={itemVariants} layout whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }} key={c._id || c.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                            <motion.tr variants={itemVariants} layout whileHover={{ background: 'var(--bg-main)', scale: 1.002, x: 2 }} key={c._id || c.id} style={{ borderBottom: '1px solid var(--border)' }}>
                                 <td style={{ padding: '0.75rem', fontWeight: 600, fontSize: '0.85rem' }}>{c.ticketId || c._id || c.id}</td>
                                 <td style={{ padding: '0.75rem' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.title}</div>
@@ -558,7 +559,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     </thead>
                     <motion.tbody variants={containerVariants} initial="hidden" animate="visible">
                         {filteredUsers.map((u) => (
-                            <motion.tr variants={itemVariants} layout whileHover={{ background: '#f8fafc', scale: 1.002, x: 2 }} key={u._id || u.id} style={{ borderBottom: '1px solid #f8fafc' }}>
+                            <motion.tr variants={itemVariants} layout whileHover={{ background: 'var(--bg-main)', scale: 1.002, x: 2 }} key={u._id || u.id} style={{ borderBottom: '1px solid var(--border)' }}>
                                 <td style={{ padding: '0.75rem' }}>
                                     <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>{u.name}</div>
                                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{u.email}</div>
@@ -631,7 +632,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
             </div>
             <motion.div variants={containerVariants} initial="hidden" animate="visible" className="admin-categories-grid">
                 {categories.map((cat, i) => (
-                    <motion.div variants={itemVariants} whileHover={{ y: -5, scale: 1.01 }} key={cat._id || i} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', border: '1px solid var(--border)', position: 'relative' }}>
+                    <motion.div variants={itemVariants} whileHover={{ y: -5, scale: 1.01, background: 'var(--bg-main)' }} key={cat._id || i} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', border: '1px solid var(--border)', position: 'relative' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                             <div>
                                 <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{typeof cat === 'string' ? cat : cat.name}</h4>
@@ -716,12 +717,12 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                         <motion.div
                             variants={itemVariants}
                             key={a._id || a.id}
-                            style={{ padding: '1.2rem', border: '1px solid var(--border)', borderRadius: '16px', background: '#f8fafc', cursor: 'pointer' }}
+                            style={{ padding: '1.2rem', border: '1px solid var(--border)', borderRadius: '16px', background: 'var(--bg-card)', cursor: 'pointer' }}
                             onClick={() => setSelectedAnnouncement(a)}
-                            whileHover={{ y: -2, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                            whileHover={{ y: -2, background: 'var(--bg-main)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-                                <span style={{ fontSize: '0.65rem', fontWeight: 800, background: 'var(--primary)', color: 'white', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>{a.target}</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 800, background: 'var(--primary)', color: 'var(--bg-main)', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>{a.target}</span>
                                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{new Date(a.createdAt || a.date).toLocaleDateString()}</span>
                             </div>
                             <h4 style={{ margin: '0 0 0.4rem 0', fontSize: '1rem', fontWeight: 700 }}>{a.title}</h4>
@@ -803,7 +804,7 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                 ) : (
                     <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {departmentStats.map((dept, i) => (
-                            <motion.div variants={itemVariants} whileHover={{ scale: 1.01, x: 2 }} key={dept.name} style={{ padding: '1rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                            <motion.div variants={itemVariants} whileHover={{ scale: 1.01, x: 2, background: 'var(--bg-main)' }} key={dept.name} style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', flexWrap: 'wrap', gap: '0.6rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: COLORS[i % COLORS.length] }} />
@@ -907,10 +908,18 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     useEffect(() => {
         const handleAdminSectionChange = (e) => {
             if (e.detail && e.detail.section) {
-                setActiveSection(e.detail.section);
+                setActiveSection(e.detail.section === 'profile' ? 'settings' : e.detail.section);
             }
         };
         window.addEventListener('admin-section-change', handleAdminSectionChange);
+
+        // Check path on mount for /profile or /settings
+        const pathParts = window.location.pathname.split('/');
+        const lastPart = pathParts[pathParts.length - 1];
+        if (lastPart === 'profile' || lastPart === 'settings') {
+            setActiveSection('settings');
+        }
+
         return () => window.removeEventListener('admin-section-change', handleAdminSectionChange);
     }, []);
 
@@ -1025,13 +1034,34 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
     }
 
     return (
-        <div className="admin-dashboard-layout">
+        <div
+            className="admin-dashboard-layout"
+            style={{
+                backgroundImage: 'url(/images.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+                minHeight: 'calc(100vh - 64px)'
+            }}
+        >
+            {/* Dark/Light overlay on bg image */}
+            <div style={{
+                position: 'fixed', inset: 0, top: '64px', zIndex: 0,
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(2px)',
+                pointerEvents: 'none'
+            }} />
 
             {/* Sidebar */}
             <aside className="desk-only" style={{
-                width: '190px', background: 'white', borderRight: '1px solid var(--border)',
+                width: '190px',
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRight: '1px solid var(--glass-border)',
                 display: 'flex', flexDirection: 'column', padding: '0.8rem 0.5rem',
-                position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', zIndex: 100
+                position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', zIndex: 100,
+                overflowY: 'auto'
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', flex: 1, marginTop: '1rem' }}>
                     {menuItems.map(item => {
@@ -1064,13 +1094,41 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                     })}
                 </div>
 
-                <button onClick={onLogout} className="btn" style={{ background: '#fecaca', color: '#b91c1c', marginTop: 'auto', width: '100%', justifyContent: 'center', padding: '0.4rem', fontSize: '0.75rem', marginBottom: '1.5rem' }}>
-                    Logout
-                </button>
+                {/* Theme Toggle + Logout at bottom */}
+                <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingBottom: '1.5rem' }}>
+                    {/* Dark/Light toggle */}
+                    <button
+                        onClick={toggleTheme}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '0.6rem',
+                            background: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid var(--glass-border)',
+                            borderRadius: '10px',
+                            padding: '0.5rem 0.8rem',
+                            cursor: 'pointer',
+                            color: 'var(--text-main)',
+                            fontWeight: 600,
+                            fontSize: '0.78rem',
+                            width: '100%',
+                            transition: 'all 0.2s ease'
+                        }}
+                        title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                    >
+                        {theme === 'dark'
+                            ? <><Sun size={14} /> Light Mode</>
+                            : <><Moon size={14} /> Dark Mode</>
+                        }
+                    </button>
+
+                    <button onClick={onLogout} className="btn" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', width: '100%', justifyContent: 'center', padding: '0.4rem', fontSize: '0.75rem' }}>
+                        Logout
+                    </button>
+                </div>
             </aside>
 
             {/* Main Content */}
-            <main style={{ flex: 1, padding: '1rem 2rem', overflowY: 'auto', minWidth: 0 }}>
+            <main style={{ flex: 1, padding: '1rem 2rem', overflowY: 'auto', minWidth: 0, position: 'relative', zIndex: 1 }}>
                 <header style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
                     <div>
                         <h1 style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', textTransform: 'capitalize', margin: 0 }}>
@@ -1113,8 +1171,8 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                             >
                                 <h3 style={{ marginBottom: '1.5rem' }}>{editingEntity ? 'Edit User' : 'Add New User'}</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                                    <input className="input" placeholder="Full Name" value={modalName} onChange={e => setModalName(e.target.value)} disabled={!!editingEntity} style={{ background: editingEntity ? '#f1f5f9' : 'white' }} />
-                                    <input className="input" placeholder="Email Address" value={modalEmail} onChange={e => setModalEmail(e.target.value)} disabled={!!editingEntity} style={{ background: editingEntity ? '#f1f5f9' : 'white' }} />
+                                    <input className="input" placeholder="Full Name" value={modalName} onChange={e => setModalName(e.target.value)} disabled={!!editingEntity} style={{ background: editingEntity ? 'var(--bg-main)' : 'var(--bg-card)', color: 'var(--text-main)' }} />
+                                    <input className="input" placeholder="Email Address" value={modalEmail} onChange={e => setModalEmail(e.target.value)} disabled={!!editingEntity} style={{ background: editingEntity ? 'var(--bg-main)' : 'var(--bg-card)', color: 'var(--text-main)' }} />
                                     <select
                                         className="input"
                                         value={modalRole}
@@ -1191,13 +1249,13 @@ const AdminDashboard = ({ user, setUser, onLogout }) => {
                                                                         style={{
                                                                             padding: '10px 14px', borderRadius: '10px', marginBottom: '4px',
                                                                             display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
-                                                                            background: isSelected ? '#eff6ff' : 'transparent',
+                                                                            background: isSelected ? 'var(--primary)15' : 'transparent',
                                                                             transition: '0.2s'
                                                                         }}
                                                                     >
                                                                         <div style={{
                                                                             width: '18px', height: '18px', borderRadius: '4px',
-                                                                            border: isSelected ? '2px solid var(--primary)' : '2px solid #cbd5e1',
+                                                                            border: isSelected ? '2px solid var(--primary)' : '2px solid var(--border)',
                                                                             background: isSelected ? 'var(--primary)' : 'transparent',
                                                                             display: 'flex', justifyContent: 'center', alignItems: 'center'
                                                                         }}>
@@ -1617,27 +1675,29 @@ const AdminSettingsView = ({ user, setUser }) => {
         ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
+    // Safely get first letter of name
+    const nameInitial = (user?.name || '').trim().charAt(0).toUpperCase() || 'U';
+
     return (
         <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
             <div className="card" style={{ maxWidth: '650px', margin: '0 auto', padding: '3rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <div style={{ position: 'relative', width: '130px', height: '130px', margin: '0 auto 1.5rem auto' }}>
-                        <div style={{
-                            width: '100%', height: '100%', borderRadius: '40px', background: '#f8fafc',
-                            overflow: 'hidden', border: '4px solid white', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)'
-                        }}>
-                            {profilePhotoUrl ? (
-                                <img src={profilePhotoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary)', background: '#eff6ff' }}>
-                                    <UserIcon size={56} />
-                                </div>
-                            )}
+                        <div
+                            onClick={() => profileInputRef.current?.click()}
+                            style={{
+                                width: '130px', height: '130px', borderRadius: '50%', overflow: 'hidden',
+                                border: '4px solid white', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)',
+                                cursor: 'pointer', transition: 'all 0.2s ease'
+                            }}
+                            title="Click to upload profile picture"
+                        >
+                            <Avatar user={user} size={130} borderRadius="50%" fontSize="3.5rem" />
                         </div>
                         <button
                             onClick={() => profileInputRef.current?.click()}
                             className="btn-primary"
-                            style={{ position: 'absolute', bottom: '0', right: '0', width: '44px', height: '44px', borderRadius: '15px', border: '4px solid white', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)' }}
+                            style={{ position: 'absolute', bottom: '0', right: '0', width: '44px', height: '44px', borderRadius: '50%', border: '4px solid white', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)' }}
                         >
                             <Camera size={20} />
                         </button>
@@ -1649,7 +1709,7 @@ const AdminSettingsView = ({ user, setUser }) => {
                                 title="Delete Photo"
                                 style={{
                                     position: 'absolute', bottom: '0', left: '-10px',
-                                    width: '40px', height: '40px', borderRadius: '12px',
+                                    width: '40px', height: '40px', borderRadius: '50%',
                                     border: '4px solid white', display: 'flex', justifyContent: 'center',
                                     alignItems: 'center', cursor: 'pointer', background: 'var(--danger)',
                                     color: 'white', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)'

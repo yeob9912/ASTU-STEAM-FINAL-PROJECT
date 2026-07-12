@@ -1,15 +1,17 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const Chat = require('../models/Chat');
-const fs = require('fs');
-const path = require('path');
-const { vectorSearch, generateAnswer } = require('../utils/rag');
+import Chat from '../models/Chat.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import { vectorSearch, generateAnswer } from '../utils/rag.js';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // @desc   Get all chats for user
 // @route  GET /api/chat
 // @access Private
-exports.getChatHistory = async (req, res) => {
+const getChatHistory = async (req, res) => {
     try {
         const chats = await Chat.find({ user: req.user._id || req.user.id }).sort({ updatedAt: -1 });
         res.json({ success: true, chats });
@@ -21,7 +23,7 @@ exports.getChatHistory = async (req, res) => {
 // @desc   Send message and get AI response (Streaming)
 // @route  POST /api/chat
 // @access Private
-exports.sendMessage = async (req, res) => {
+const sendMessage = async (req, res) => {
     try {
         const { message, chatId } = req.body;
         if (!message) return res.status(400).json({ success: false, message: 'Message is required' });
@@ -48,6 +50,7 @@ exports.sendMessage = async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
 
         // Send the chatId immediately so the frontend can store it before the first text chunk
         res.write(`data: ${JSON.stringify({ chatId: chat._id })}\n\n`);
@@ -61,12 +64,12 @@ exports.sendMessage = async (req, res) => {
         if (isGreeting) {
             logMsg += `Greeting detected\n`;
             responseStream = (async function* () {
-                yield { text: () => "Hello , what i can i help you ?" };
+                yield { text: "Hello , what i can i help you ?" };
             })();
         } else if (isThankYou) {
             logMsg += `Thank you detected\n`;
             responseStream = (async function* () {
-                yield { text: () => "No problem at all! I’m happy to assist whenever you need." };
+                yield { text: "No problem at all! I’m happy to assist whenever you need." };
             })();
         } else {
             logMsg += `Starting RAG search...\n`;
@@ -74,12 +77,20 @@ exports.sendMessage = async (req, res) => {
             logMsg += `Found ${contextChunks.length} chunks\n`;
             responseStream = await generateAnswer(message, contextChunks);
         }
-        fs.appendFileSync(path.join(__dirname, '../chat_debug.log'), logMsg);
+        
+        try {
+            fs.appendFileSync(path.join(__dirname, '../chat_debug.log'), logMsg);
+        } catch (e) {
+            console.error('Failed to write debug log:', e.message);
+        }
 
         let fullBotResponse = "";
 
         for await (const chunk of responseStream) {
-            const chunkText = chunk.text();
+            // chunk.text is a property in the new @google/genai SDK
+            const chunkText = chunk.text; 
+            if (!chunkText) continue;
+            
             fullBotResponse += chunkText;
 
             // To create an attractive typing effect, we stream character by character
@@ -99,7 +110,6 @@ exports.sendMessage = async (req, res) => {
 
     } catch (error) {
         console.error('Chat error:', error);
-        // If error happens during stream, we might have already sent headers
         if (!res.headersSent) {
             res.status(500).json({ success: false, message: error.message });
         } else {
@@ -112,7 +122,7 @@ exports.sendMessage = async (req, res) => {
 // @desc   Delete a chat session
 // @route  DELETE /api/chat/:id
 // @access Private
-exports.deleteChat = async (req, res) => {
+const deleteChat = async (req, res) => {
     try {
         const chat = await Chat.findById(req.params.id);
 
@@ -132,3 +142,5 @@ exports.deleteChat = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+export { getChatHistory, sendMessage, deleteChat };

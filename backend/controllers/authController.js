@@ -1,5 +1,6 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
+import User from '../models/User.js';
+import jwt from 'jsonwebtoken';
+import https from 'https';
 
 // Helper: generate JWT
 const generateToken = (id) => {
@@ -176,4 +177,63 @@ const deleteProfilePicture = async (req, res) => {
     }
 };
 
-module.exports = { signup, login, getMe, updateProfile, deleteProfilePicture, changePassword };
+// @desc   Google OAuth login / register
+// @route  POST /api/auth/google
+// @access Public
+const googleLogin = async (req, res) => {
+    const { idToken } = req.body;
+    if (!idToken) return res.status(400).json({ success: false, message: 'No ID token provided' });
+
+    try {
+        // Verify the Google ID token via Google's tokeninfo endpoint (no extra packages needed)
+        const payload = await new Promise((resolve, reject) => {
+            const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
+            https.get(url, (r) => {
+                let data = '';
+                r.on('data', (chunk) => { data += chunk; });
+                r.on('end', () => {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if (parsed.error) reject(new Error(parsed.error_description || parsed.error));
+                        else resolve(parsed);
+                    } catch (e) { reject(e); }
+                });
+            }).on('error', reject);
+        });
+
+        // Confirm the token was issued for our app
+        if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
+            return res.status(401).json({ success: false, message: 'Token audience mismatch' });
+        }
+
+        const { email, name, picture } = payload;
+
+        // Find or create user
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({
+                name: name || email.split('@')[0],
+                email,
+                role: 'student',
+                profilePicture: picture || null,
+                googleId: payload.sub      // saved correctly now — schema has the field
+            });
+            console.log(`✅ [DB WRITE SUCCESS]: New Google user registered -> ${user.email} (ID: ${user._id})`);
+        }
+
+        if (user.status === 'inactive') {
+            return res.status(403).json({ success: false, message: 'Account is inactive. Contact admin.' });
+        }
+
+        const token = generateToken(user._id);
+        res.json({
+            success: true,
+            token,
+            user: { id: user._id, name: user.name, email: user.email, role: user.role, departments: user.departments, profilePicture: user.profilePicture }
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Google token verification failed: ' + error.message });
+    }
+};
+
+export { signup, login, getMe, updateProfile, deleteProfilePicture, changePassword, googleLogin };

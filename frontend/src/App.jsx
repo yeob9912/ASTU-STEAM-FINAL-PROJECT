@@ -12,6 +12,7 @@ import './index.css';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [theme, setTheme] = useState(localStorage.getItem('astu_theme') || 'light');
 
   useEffect(() => {
     const savedUser = localStorage.getItem('astu_user');
@@ -24,6 +25,17 @@ function App() {
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('dark');
+    } else {
+      document.body.classList.remove('dark');
+    }
+    localStorage.setItem('astu_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const handleLogout = () => {
     localStorage.removeItem('astu_user');
@@ -40,7 +52,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <MainContent user={user} setUser={setUser} onLogout={handleLogout} />
+      <MainContent user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} onLogout={handleLogout} />
     </BrowserRouter>
   );
 }
@@ -51,7 +63,7 @@ const RequireAuth = ({ user, children, role }) => {
   return children;
 };
 
-const MainContent = ({ user, setUser, onLogout }) => {
+const MainContent = ({ user, setUser, theme, toggleTheme, onLogout }) => {
   const location = useLocation();
   const isAuth = location.pathname === '/login' || location.pathname === '/signup';
 
@@ -67,7 +79,7 @@ const MainContent = ({ user, setUser, onLogout }) => {
   return (
     <div className="app-container">
       {/* Hide specific UI elements on Auth pages */}
-      {!isAuth && <Navbar user={user} onLogout={onLogout} />}
+      {!isAuth && <Navbar user={user} theme={theme} toggleTheme={toggleTheme} onLogout={onLogout} />}
 
       <main className="main-content">
         <Routes>
@@ -78,9 +90,9 @@ const MainContent = ({ user, setUser, onLogout }) => {
           {/* Protected Routes */}
           <Route path="/" element={<Navigate to={user ? getDashboardPath(user.role) : "/login"} replace />} />
 
-          <Route path="/student/*" element={<RequireAuth user={user} role="student"><StudentDashboard user={user} setUser={setUser} onLogout={onLogout} /></RequireAuth>} />
-          <Route path="/staff/*" element={<RequireAuth user={user} role="staff"><StaffDashboard user={user} setUser={setUser} onLogout={onLogout} /></RequireAuth>} />
-          <Route path="/admin/*" element={<RequireAuth user={user} role="admin"><AdminDashboard user={user} setUser={setUser} onLogout={onLogout} /></RequireAuth>} />
+          <Route path="/student/*" element={<RequireAuth user={user} role="student"><StudentDashboard user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} onLogout={onLogout} /></RequireAuth>} />
+          <Route path="/staff/*" element={<RequireAuth user={user} role="staff"><StaffDashboard user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} onLogout={onLogout} /></RequireAuth>} />
+          <Route path="/admin/*" element={<RequireAuth user={user} role="admin"><AdminDashboard user={user} setUser={setUser} theme={theme} toggleTheme={toggleTheme} onLogout={onLogout} /></RequireAuth>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

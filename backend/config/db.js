@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try {
@@ -7,7 +7,7 @@ const connectDB = async () => {
         const conn = await mongoose.connect(uri, {
             serverSelectionTimeoutMS: 10000,
         });
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        console.log(`✅ MongoDB Connected`);
     } catch (error) {
         console.error(`❌ MongoDB Connection Error: ${error.message}`);
         console.error('Check your MONGO_URI in .env — make sure Atlas IP whitelist allows 0.0.0.0/0');
@@ -15,4 +15,4 @@ const connectDB = async () => {
     }
 };
 
-module.exports = connectDB;
+export default connectDB;

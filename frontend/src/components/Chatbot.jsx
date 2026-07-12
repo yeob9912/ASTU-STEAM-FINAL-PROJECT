@@ -98,6 +98,10 @@ const Chatbot = () => {
 
         try {
             const response = await apiSendMessageStream({ message: userMsg, chatId: activeChatId });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.message || `Server returned status ${response.status}`);
+            }
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
@@ -162,13 +166,34 @@ const Chatbot = () => {
                             }
                         } catch (e) {
                             console.error("Error parsing block:", e, "Line:", line);
+                            if (line.includes('"error"')) {
+                                throw e;
+                            }
                         }
                     }
                 }
             }
         } catch (err) {
             console.error(err);
-            setMessages(prev => [...prev, { text: "Connection error. Please check your internet and API key.", isBot: true }]);
+            let friendlyError = "Connection error. Please check your internet and API key.";
+            if (err.message) {
+                try {
+                    const parsed = JSON.parse(err.message);
+                    if (parsed.error && parsed.error.message) {
+                        try {
+                            const inner = JSON.parse(parsed.error.message);
+                            friendlyError = (inner.error && inner.error.message) ? inner.error.message : (parsed.error.message || friendlyError);
+                        } catch {
+                            friendlyError = parsed.error.message || friendlyError;
+                        }
+                    } else if (parsed.error) {
+                        friendlyError = parsed.error || friendlyError;
+                    }
+                } catch {
+                    friendlyError = err.message;
+                }
+            }
+            setMessages(prev => [...prev, { text: friendlyError, isBot: true }]);
         } finally {
             setIsLoading(false);
             setIsStreaming(false);
@@ -196,12 +221,12 @@ const Chatbot = () => {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'white', display: 'flex', flexDirection: 'column', zIndex: 9999 }}>
+                        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--bg-main)', display: 'flex', flexDirection: 'column', zIndex: 9999 }}>
 
-                        <div style={{ background: 'white', borderBottom: '1px solid #f1f5f9' }}>
+                        <div style={{ background: 'var(--bg-card)', borderBottom: '1px solid var(--border)' }}>
                             <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0.8rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '70px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                    <button className="btn" style={{ padding: '0.6rem 0.8rem', borderRadius: '12px', background: showHistory ? 'var(--primary)' : 'white', color: showHistory ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                    <button className="btn" style={{ padding: '0.6rem 0.8rem', borderRadius: '12px', background: showHistory ? 'var(--primary)' : 'var(--bg-card)', color: showHistory ? 'white' : 'var(--text-main)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '6px' }}
                                         onClick={() => setShowHistory(!showHistory)}>
                                         <History size={18} />
                                         {!isMobile && <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>History</span>}
@@ -218,7 +243,7 @@ const Chatbot = () => {
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <button onClick={startNewChat} className="btn glass" style={{ fontSize: '0.85rem', padding: '0.6rem 1rem' }}>New Chat</button>
-                                    <button onClick={() => setIsOpen(false)} className="btn" style={{ padding: '0.6rem 1rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'white', fontWeight: 600, fontSize: '0.9rem' }}>Exit</button>
+                                    <button onClick={() => setIsOpen(false)} className="btn" style={{ padding: '0.6rem 1rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)', fontWeight: 600, fontSize: '0.9rem' }}>Exit</button>
                                 </div>
                             </div>
                         </div>
@@ -227,14 +252,14 @@ const Chatbot = () => {
                             <AnimatePresence>
                                 {showHistory && (
                                     <motion.div initial={{ x: -320, opacity: 0 }} animate={{ x: 0, opacity: 1, width: isMobile ? '100%' : 320 }} exit={{ x: -320, opacity: 0 }} transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                        style={{ position: isMobile ? 'absolute' : 'relative', top: 0, left: 0, height: '100%', background: 'white', borderRight: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', zIndex: 100 }}>
-                                        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        style={{ position: isMobile ? 'absolute' : 'relative', top: 0, left: 0, height: '100%', background: 'var(--bg-card)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 100 }}>
+                                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <h4 style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>CONVERSATIONS</h4>
-                                            {isMobile && <button onClick={() => setShowHistory(false)} style={{ border: 'none', background: 'none' }}><X size={20} /></button>}
+                                            {isMobile && <button onClick={() => setShowHistory(false)} style={{ border: 'none', background: 'none', color: 'var(--text-main)' }}><X size={20} /></button>}
                                         </div>
                                         <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', ...hideScrollbar }}>
                                             {chats.map(chat => (
-                                                <div key={chat._id} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid #f8fafc' }}>
+                                                <div key={chat._id} style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
                                                     <button onClick={() => loadHistory(chat)} style={{ flex: 1, padding: '1rem 0', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', color: currentChatId === chat._id ? 'var(--primary)' : 'var(--text-main)' }}>
                                                         <div style={{ fontWeight: 500, fontSize: '0.95rem' }}>{chat.title}</div>
                                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(chat.updatedAt).toLocaleDateString()}</div>
@@ -250,7 +275,7 @@ const Chatbot = () => {
                             </AnimatePresence>
 
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.5rem', background: '#fafafa', ...hideScrollbar }}>
+                                <div style={{ flex: 1, overflowY: 'auto', padding: '2rem 1.5rem', background: 'var(--bg-main)', ...hideScrollbar }}>
                                     <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                         {messages.map((msg, i) => (
                                             <div key={i} style={{ alignSelf: msg.isBot ? 'flex-start' : 'flex-end', maxWidth: '85%', display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: msg.isBot ? 'flex-start' : 'flex-end' }}>
@@ -260,7 +285,7 @@ const Chatbot = () => {
                                                     </div>
                                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>{msg.isBot ? 'AI' : 'You'}</span>
                                                 </div>
-                                                <div style={{ padding: '0.9rem 1.2rem', borderRadius: msg.isBot ? '4px 18px 18px 18px' : '18px 18px 4px 18px', background: msg.isBot ? 'white' : 'var(--primary)', color: msg.isBot ? 'var(--text-main)' : 'white', fontSize: '0.95rem', lineHeight: '1.6', border: msg.isBot ? '1px solid #f1f5f9' : 'none', boxShadow: '0 2px 10px rgba(0,0,0,0.02)', whiteSpace: 'pre-wrap' }}>
+                                                <div style={{ padding: '0.9rem 1.2rem', borderRadius: msg.isBot ? '4px 18px 18px 18px' : '18px 18px 4px 18px', background: msg.isBot ? 'var(--bg-card)' : 'var(--primary)', color: msg.isBot ? 'var(--text-main)' : 'white', fontSize: '0.95rem', lineHeight: '1.6', border: msg.isBot ? '1px solid var(--border)' : 'none', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', whiteSpace: 'pre-wrap' }}>
                                                     {msg.text}
                                                 </div>
                                             </div>
@@ -268,7 +293,7 @@ const Chatbot = () => {
                                         {isLoading && (
                                             <div style={{ alignSelf: 'flex-start', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <div style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#eff6ff', color: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Sparkles size={11} /></div>
+                                                    <div style={{ width: '22px', height: '22px', borderRadius: '5px', background: 'var(--primary)20', color: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Sparkles size={11} /></div>
                                                     <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>AI Thinking</span>
                                                 </div>
                                                 <TypingIndicator />
@@ -278,10 +303,10 @@ const Chatbot = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ padding: '1.5rem', background: 'white', borderTop: '1px solid #f1f5f9' }}>
+                                <div style={{ padding: '1.5rem', background: 'var(--bg-card)', borderTop: '1px solid var(--border)' }}>
                                     <form onSubmit={handleSend} style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', gap: '0.8rem' }}>
                                         <input placeholder="Ask about campus life..." value={input} onChange={e => setInput(e.target.value)} disabled={isLoading || isStreaming}
-                                            style={{ flex: 1, background: '#f8fafc', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid #e2e8f0', fontSize: '1rem', outline: 'none' }} />
+                                            style={{ flex: 1, background: 'var(--bg-main)', color: 'var(--text-main)', padding: '0.8rem 1.2rem', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '1rem', outline: 'none' }} />
                                         <button type="submit" disabled={isLoading || isStreaming || !input.trim()} style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'var(--primary)', color: 'white', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', opacity: (isLoading || isStreaming || !input.trim()) ? 0.6 : 1 }}>
                                             <Send size={20} />
                                         </button>

@@ -4,7 +4,7 @@ import {
     LogOut, Layout, User as UserIcon, Bell, Menu, X, Plus,
     MessageCircle, History, ClipboardList, LayoutDashboard,
     FileText, Users, Grid, BarChart2, Settings, Trash2, Check, CheckCheck,
-    Database, TrendingUp
+    Database, TrendingUp, Sun, Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,8 +15,9 @@ import {
     apiDeleteProfilePicture,
     SERVER_URL
 } from '../api';
+import Avatar from './Avatar';
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user, theme, toggleTheme, onLogout }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [showNotifications, setShowNotifications] = useState(false);
@@ -157,7 +158,8 @@ const Navbar = ({ user, onLogout }) => {
     };
 
     return (
-        <nav className="nav-container" style={{
+        <>
+            <nav className="nav-container" style={{
             padding: '0.8rem 2rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -374,52 +376,40 @@ const Navbar = ({ user, onLogout }) => {
 
                         {/* ── User Avatar: visible on ALL screens ── */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                            <div style={{
-                                width: '36px', height: '36px', borderRadius: '10px',
-                                background: 'var(--primary)', color: 'white',
-                                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                overflow: 'hidden', border: '2px solid white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}>
-                                {user?.profilePicture ? (
-                                    <img
-                                        src={user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`}
-                                        alt="Profile"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    />
-                                ) : (
-                                    <UserIcon size={20} />
-                                )}
-                            </div >
+                            <Avatar user={user} size={36} borderRadius="50%" />
                             <div className="desk-only">
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: '0.9rem', textTransform: 'capitalize' }}>{user?.name || 'User'}</p>
                                 <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.75rem', textTransform: 'capitalize' }}>{user?.role || 'Portal Access'}</p>
                             </div>
                         </div >
-
-                        {/* ── Logout: desktop only ── */}
-                        < button onClick={onLogout} className="desk-only btn" style={{ background: '#ff4d4d1a', color: '#ff4d4d', padding: '0.5rem 1rem', marginLeft: '0.5rem' }}>
-                            <LogOut size={18} /> <span>Logout</span>
-                        </button >
-
                         {/* ── Hamburger: mobile only ── */}
-                        < button
+                        <button
                             className="mob-only btn"
-                            style={{ padding: '8px' }}
+                            style={{
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-main)',
+                                cursor: 'pointer'
+                            }}
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         >
                             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button >
-                    </div >
+                        </button>
+                    </div>
                 ) : (
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <Link to="/login" className="btn" style={{ color: 'var(--text-main)', padding: '0.5rem 1.2rem' }}>Login</Link>
                         <Link to="/signup" className="btn btn-primary" style={{ padding: '0.5rem 1.2rem' }}><span>Join Now</span></Link>
                     </div>
                 )}
-            </div >
+            </div>
+        </nav>
 
-
-            <AnimatePresence>
+        <AnimatePresence>
                 {isMobileMenuOpen && (
                     <>
                         {/* Backdrop */}
@@ -446,7 +436,12 @@ const Navbar = ({ user, onLogout }) => {
                                 position: 'fixed', top: 0, left: 0, bottom: 0,
                                 width: '280px', padding: '2rem 1.5rem', zIndex: 2000,
                                 borderRadius: '0 20px 20px 0', borderLeft: 'none',
-                                overflowY: 'auto', display: 'flex', flexDirection: 'column'
+                                overflowY: 'auto', display: 'flex', flexDirection: 'column',
+                                transition: 'none',
+                                background: 'var(--bg-card)',
+                                borderRight: '1px solid var(--border)',
+                                color: 'var(--text-main)',
+                                boxShadow: '5px 0 25px rgba(0,0,0,0.15)'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
@@ -456,24 +451,18 @@ const Navbar = ({ user, onLogout }) => {
                                     </div>
                                     <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary)', fontWeight: 800 }}>ASTU Smart</h3>
                                 </div>
-                                <button className="btn" onClick={() => setIsMobileMenuOpen(false)} style={{ padding: '8px' }}>
-                                    <X size={24} />
+                                <button className="btn" onClick={() => setIsMobileMenuOpen(false)} style={{
+                                    padding: '8px 10px', background: 'var(--bg-main)', border: '1px solid var(--border)',
+                                    borderRadius: '10px', color: 'var(--text-main)', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
+                                }}>
+                                    <X size={22} />
                                 </button>
                             </div>
 
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1.5rem' }}>
-                                    <div style={{ width: '45px', height: '45px', borderRadius: '12px', background: 'var(--primary)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', overflow: 'hidden' }}>
-                                        {user?.profilePicture ? (
-                                            <img
-                                                src={user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`}
-                                                alt="Profile"
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <UserIcon size={24} />
-                                        )}
-                                    </div>
+                                    <Avatar user={user} size={45} borderRadius="50%" />
                                     <div style={{ overflow: 'hidden' }}>
                                         <h4 style={{ margin: 0, fontSize: '1rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', textTransform: 'capitalize' }}>{user?.name || 'User'}</h4>
                                         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'capitalize' }}>{user?.role || 'Account'}</p>
@@ -506,8 +495,8 @@ const Navbar = ({ user, onLogout }) => {
                                                 </Link>
                                             </motion.div>
                                             <motion.div variants={itemVariants}>
-                                                <Link to="/student/settings" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)', textDecoration: 'none', fontWeight: 600, padding: '0.8rem', borderRadius: '12px', background: location.pathname === '/student/settings' ? 'var(--primary)10' : 'transparent' }}>
-                                                    <Settings size={18} /> Settings
+                                                <Link to="/student/profile" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)', textDecoration: 'none', fontWeight: 600, padding: '0.8rem', borderRadius: '12px', background: (location.pathname === '/student/profile' || location.pathname === '/student/settings') ? 'var(--primary)10' : 'transparent' }}>
+                                                    <UserIcon size={18} /> Profile
                                                 </Link>
                                             </motion.div>
                                         </>
@@ -541,24 +530,27 @@ const Navbar = ({ user, onLogout }) => {
                                             <motion.button
                                                 variants={itemVariants}
                                                 onClick={() => {
-                                                    window.dispatchEvent(new CustomEvent('staff-view-change', { detail: { view: 'settings' } }));
+                                                    window.dispatchEvent(new CustomEvent('staff-view-change', { detail: { view: 'profile' } }));
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)', fontWeight: 600, background: 'transparent', border: 'none', padding: '0.8rem', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%', fontFamily: 'inherit' }}
                                             >
-                                                <Settings size={18} /> Account Settings
+                                                <UserIcon size={18} /> Profile
                                             </motion.button>
                                         </>
                                     )}
 
                                     {user?.role === 'admin' && (
-                                        ['Overview', 'Complaints', 'Users', 'Categories', 'Analytics', 'Announcements', 'Knowledge Base', 'Settings'].map(sect => (
+                                        ['Overview', 'Complaints', 'Users', 'Categories', 'Analytics', 'Announcements', 'Knowledge Base', 'Profile'].map(sect => (
                                             <motion.button
                                                 key={sect}
                                                 variants={itemVariants}
                                                 onClick={() => {
                                                     const sectionId = sect.toLowerCase().replace(' ', '-');
-                                                    window.dispatchEvent(new CustomEvent('admin-section-change', { detail: { section: sectionId } }));
+                                                    navigate('/admin');
+                                                    setTimeout(() => {
+                                                        window.dispatchEvent(new CustomEvent('admin-section-change', { detail: { section: sectionId } }));
+                                                    }, 50);
                                                     setIsMobileMenuOpen(false);
                                                 }}
                                                 style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-main)', fontWeight: 600, background: 'transparent', border: 'none', padding: '0.8rem', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
@@ -570,7 +562,7 @@ const Navbar = ({ user, onLogout }) => {
                                                 {sect === 'Analytics' && <BarChart2 size={18} />}
                                                 {sect === 'Announcements' && <Bell size={18} />}
                                                 {sect === 'Knowledge Base' && <Database size={18} />}
-                                                {sect === 'Settings' && <Settings size={18} />}
+                                                {sect === 'Profile' && <UserIcon size={18} />}
                                                 <span style={{ fontSize: '0.9rem' }}>{sect}</span>
                                             </motion.button>
                                         ))
@@ -578,7 +570,29 @@ const Navbar = ({ user, onLogout }) => {
                                 </div>
                             </div>
 
-                            <motion.div variants={itemVariants} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                            <motion.div variants={itemVariants} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                {/* Dark/Light toggle in mobile menu */}
+                                {toggleTheme && (
+                                    <button
+                                        onClick={toggleTheme}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                            background: 'var(--glass-bg)',
+                                            border: '1px solid var(--glass-border)',
+                                            borderRadius: '12px',
+                                            padding: '0.9rem 1rem',
+                                            cursor: 'pointer',
+                                            color: 'var(--text-main)',
+                                            fontWeight: 600,
+                                            fontSize: '0.95rem',
+                                            width: '100%',
+                                            backdropFilter: 'blur(8px)',
+                                        }}
+                                    >
+                                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                                    </button>
+                                )}
                                 <button onClick={() => { onLogout(); setIsMobileMenuOpen(false); }} className="btn" style={{ width: '100%', justifyContent: 'center', background: '#ff4d4d1a', color: '#ff4d4d', borderRadius: '12px', padding: '1rem' }}>
                                     <LogOut size={18} /> Sign Out
                                 </button>
@@ -587,7 +601,7 @@ const Navbar = ({ user, onLogout }) => {
                     </>
                 )}
             </AnimatePresence>
-        </nav >
+        </>
     );
 };
 

@@ -18,6 +18,9 @@ export const apiSignup = (data) =>
 export const apiLogin = (data) =>
     fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json());
 
+export const apiGoogleLogin = (idToken) =>
+    fetch(`${API_BASE}/auth/google`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken }) }).then(r => r.json());
+
 export const apiUpdateProfile = (data) => {
     const token = localStorage.getItem('astu_token');
     const isFormData = data instanceof FormData;

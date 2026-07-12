@@ -6,11 +6,12 @@ import {
     History, User, Settings, Send, Save, Image as ImageIcon,
     Paperclip, Search, Filter, ChevronRight, MessageCircle,
     Bell, LayoutDashboard, Share2, MoreVertical, X, List, ClipboardList,
-    LogOut, Camera, Upload, Trash2, Download
+    LogOut, Camera, Upload, Trash2, Download, Sun, Moon
 } from 'lucide-react';
 import { apiCreateTicket, apiGetMyTickets, apiGetCategories, apiUpdateProfile, apiGetAnnouncements, apiDeleteProfilePicture, apiChangePassword, SERVER_URL } from '../api';
+import Avatar from '../components/Avatar';
 
-const StudentDashboard = ({ user, setUser, onLogout }) => {
+const StudentDashboard = ({ user, setUser, onLogout, theme, toggleTheme }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -200,8 +201,8 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                 <div className="card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                         <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Campus Support</h3>
-                        <div style={{ padding: '1.2rem', background: '#eff6ff', borderRadius: '16px', border: '1px solid #bfdbfe', marginBottom: '1.5rem' }}>
-                            <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e40af', lineHeight: 1.5 }}>
+                        <div style={{ padding: '1.2rem', background: 'var(--primary)15', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+                            <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
                                 <strong>Smart Tip:</strong> Attach photos of the issue to help our maintenance team identify the problem faster.
                             </p>
                         </div>
@@ -229,7 +230,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{ann.title}</h3>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: '#f1f5f9', padding: '4px 12px', borderRadius: '20px' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--bg-main)', padding: '4px 12px', borderRadius: '20px' }}>
                                 {new Date(ann.createdAt).toLocaleDateString()}
                             </span>
                         </div>
@@ -308,7 +309,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                             onClick={() => fileInputRef.current?.click()}
                             style={{
                                 padding: '2.5rem 1rem', border: '2px dashed #cbd5e1', borderRadius: '24px',
-                                textAlign: 'center', background: '#f8fafc', cursor: 'pointer',
+                                textAlign: 'center', background: 'var(--bg-card)', cursor: 'pointer',
                                 transition: 'all 0.3s ease'
                             }}
                         >
@@ -321,7 +322,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                 onChange={handleFileChange}
                             />
                             <div style={{
-                                width: '64px', height: '64px', background: 'white', borderRadius: '20px',
+                                width: '64px', height: '64px', background: 'var(--bg-main)', borderRadius: '20px',
                                 display: 'flex', justifyContent: 'center', alignItems: 'center',
                                 margin: '0 auto 1.2rem auto', boxShadow: '0 8px 15px -3px rgba(0,0,0,0.08)',
                                 color: 'var(--primary)'
@@ -348,7 +349,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                                 exit={{ scale: 0.8, opacity: 0 }}
                                                 key={idx}
                                                 style={{
-                                                    position: 'relative', padding: '0.8rem', background: 'white',
+                                                    position: 'relative', padding: '0.8rem', background: 'var(--bg-card)',
                                                     border: '1px solid var(--border)', borderRadius: '16px',
                                                     display: 'flex', flexDirection: 'column', gap: '0.6rem',
                                                     boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
@@ -359,7 +360,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                                         <img src={file.preview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                     </div>
                                                 ) : (
-                                                    <div style={{ width: '100%', height: '80px', borderRadius: '10px', background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-muted)' }}>
+                                                    <div style={{ width: '100%', height: '80px', borderRadius: '10px', background: 'var(--bg-main)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--text-muted)' }}>
                                                         <FileText size={32} opacity={0.3} />
                                                     </div>
                                                 )}
@@ -416,7 +417,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                 style={{
                                     padding: '1.2rem', border: '1px solid var(--border)', borderRadius: '16px',
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    cursor: 'pointer', background: 'white', flexWrap: 'wrap', gap: '1rem'
+                                    cursor: 'pointer', background: 'var(--bg-card)', flexWrap: 'wrap', gap: '1rem'
                                 }}
                             >
                                 <div style={{ display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
@@ -466,7 +467,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                             </div>
                             <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>{selectedTicket.title}</h2>
                             <p style={{ color: 'var(--text-muted)' }}>{selectedTicket.description}</p>
-                            <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#f8fafc', borderRadius: '12px' }}>
+                            <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'var(--bg-card)', borderRadius: '12px' }}>
                                 <p style={{ margin: 0 }}><strong>Status:</strong> {selectedTicket.status}</p>
                                 {selectedTicket.remarks && selectedTicket.remarks.length > 0 && (
                                     <div style={{ marginTop: '1.5rem' }}>
@@ -488,7 +489,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                                         <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.8rem', textTransform: 'uppercase' }}>Attachments</p>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '0.8rem' }}>
                                             {selectedTicket.attachments.map((att, i) => (
-                                                <div key={i} style={{ padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '16px', background: 'white', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                                <div key={i} style={{ padding: '0.6rem', border: '1px solid var(--border)', borderRadius: '16px', background: 'var(--bg-card)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                                                     {att.fileType === 'image' ? (
                                                         <>
                                                             <img
@@ -557,7 +558,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                             </p>
                         </div>
 
-                        <div style={{ background: '#f8fafc', padding: '2rem', borderRadius: '20px', border: '1px solid var(--border)', lineHeight: 1.8, fontSize: '1.1rem', color: 'var(--text-main)', whiteSpace: 'pre-wrap' }}>
+                        <div style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: '20px', border: '1px solid var(--border)', lineHeight: 1.8, fontSize: '1.1rem', color: 'var(--text-main)', whiteSpace: 'pre-wrap' }}>
                             {selectedAnnouncement.text || selectedAnnouncement.content}
                         </div>
 
@@ -584,29 +585,69 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
     });
 
     return (
-        <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)', background: '#f8fafc' }}>
+        <div
+            className="student-dashboard-layout"
+            style={{
+                display: 'flex',
+                minHeight: 'calc(100vh - 64px)',
+                backgroundImage: 'url(/images.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed'
+            }}
+        >
+            {/* Dark/Light overlay on bg image */}
+            <div style={{
+                position: 'fixed', inset: 0, top: '64px', zIndex: 0,
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(2px)',
+                pointerEvents: 'none'
+            }} />
+
             <aside style={{
-                width: '260px', background: 'white', borderRight: '1px solid #f1f5f9',
+                width: '260px',
+                background: 'var(--glass-bg)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderRight: '1px solid var(--glass-border)',
                 padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column',
-                position: 'sticky', top: '64px', height: 'calc(100vh - 64px)'
+                position: 'sticky', top: '64px', height: 'calc(100vh - 64px)',
+                zIndex: 100
             }} className="desk-only">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1 }}>
                     <Link to="/student" style={getSidebarLinkStyle(currentView === 'summary')}><LayoutDashboard size={18} /> Home</Link>
                     <Link to="/student/submit" style={getSidebarLinkStyle(currentView === 'submit')}><Plus size={18} /> New compliant</Link>
                     <Link to="/student/history" style={getSidebarLinkStyle(currentView === 'history')}><History size={18} /> History</Link>
                     <Link to="/student/announcements" style={getSidebarLinkStyle(currentView === 'announcements')}><Bell size={18} /> Announcements</Link>
-                    <Link to="/student/settings" style={getSidebarLinkStyle(currentView === 'settings')}><Settings size={18} /> Settings</Link>
+                    <Link to="/student/profile" style={getSidebarLinkStyle(currentView === 'profile' || currentView === 'settings')}><User size={18} /> Profile</Link>
                 </div>
 
-                <button onClick={onLogout} className="btn" style={{ background: '#fecaca', color: '#b91c1c', marginTop: 'auto', width: '100%', justifyContent: 'center', padding: '0.6rem', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+                {/* Dark mode toggle */}
+                {toggleTheme && (
+                    <button
+                        onClick={toggleTheme}
+                        className="btn glass"
+                        style={{
+                            width: '100%', justifyContent: 'center', padding: '0.6rem',
+                            fontSize: '0.85rem', marginBottom: '0.5rem',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem',
+                            border: '1px solid var(--glass-border)', borderRadius: '10px'
+                        }}
+                    >
+                        {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </button>
+                )}
+
+                <button onClick={onLogout} className="btn" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', marginTop: '0.3rem', width: '100%', justifyContent: 'center', padding: '0.6rem', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
                     <LogOut size={16} /> Logout
                 </button>
             </aside>
 
-            <main className="responsive-container" style={{ flex: 1 }}>
+            <main className="responsive-container" style={{ flex: 1, position: 'relative', zIndex: 1 }}>
                 <header style={{ marginBottom: '3rem' }}>
-                    <h1 className="adaptive-header" style={{ color: '#1e293b' }}>
-                        {currentView === 'summary' ? `Welcome, ${capitalize(user?.name?.split(' ')[0])}!` : currentView.charAt(0).toUpperCase() + currentView.slice(1)}
+                    <h1 className="adaptive-header" style={{ color: 'var(--text-main)' }}>
+                        {currentView === 'summary' ? `Welcome, ${capitalize(user?.name?.split(' ')[0])}!` : (currentView === 'profile' || currentView === 'settings' ? 'Profile' : currentView.charAt(0).toUpperCase() + currentView.slice(1))}
                     </h1>
                 </header>
 
@@ -616,6 +657,7 @@ const StudentDashboard = ({ user, setUser, onLogout }) => {
                     <Route path="history" element={renderHistory()} />
                     <Route path="announcements" element={renderAnnouncements()} />
                     <Route path="settings" element={<StudentSettingsView user={user} setUser={setUser} />} />
+                    <Route path="profile" element={<StudentSettingsView user={user} setUser={setUser} />} />
                 </Routes>
                 {renderAnnouncementModal()}
 
@@ -776,22 +818,25 @@ const StudentSettingsView = ({ user, setUser }) => {
         ? (user.profilePicture.startsWith('data:') ? user.profilePicture : `${SERVER_URL}${user.profilePicture}`)
         : null;
 
+    // Safely get first letter of name
+    const nameInitial = (user?.name || '').trim().charAt(0).toUpperCase() || 'U';
+
     return (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
             <div className="card" style={{ maxWidth: '650px', margin: '0 auto', padding: '2rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <div style={{ position: 'relative', width: '130px', height: '130px', margin: '0 auto 1.5rem auto' }}>
-                        <div style={{
-                            width: '100%', height: '100%', borderRadius: '40px', background: '#f8fafc',
-                            overflow: 'hidden', border: '4px solid white', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)'
-                        }}>
-                            {profilePhotoUrl ? (
-                                <img src={profilePhotoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--primary)', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' }}>
-                                    <User size={56} />
-                                </div>
-                            )}
+                        <div
+                            onClick={() => profileInputRef.current?.click()}
+                            style={{
+                                width: '130px', height: '130px', borderRadius: '50%', overflow: 'hidden',
+                                border: '4px solid white', boxShadow: '0 12px 24px -6px rgba(0,0,0,0.12)',
+                                cursor: 'pointer', transition: 'all 0.2s ease'
+                            }}
+                            title="Click to upload profile picture"
+                            className="profile-avatar-circle"
+                        >
+                            <Avatar user={user} size={130} borderRadius="50%" fontSize="3.5rem" />
                         </div>
                         <button
                             onClick={() => profileInputRef.current?.click()}
@@ -799,7 +844,7 @@ const StudentSettingsView = ({ user, setUser }) => {
                             className="btn-primary"
                             style={{
                                 position: 'absolute', bottom: '0', right: '0',
-                                width: '44px', height: '44px', borderRadius: '15px',
+                                width: '44px', height: '44px', borderRadius: '50%',
                                 border: '4px solid white', display: 'flex', justifyContent: 'center',
                                 alignItems: 'center', cursor: 'pointer', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)'
                             }}
@@ -814,7 +859,7 @@ const StudentSettingsView = ({ user, setUser }) => {
                                 title="Delete Photo"
                                 style={{
                                     position: 'absolute', bottom: '0', left: '-10px',
-                                    width: '40px', height: '40px', borderRadius: '12px',
+                                    width: '40px', height: '40px', borderRadius: '50%',
                                     border: '4px solid white', display: 'flex', justifyContent: 'center',
                                     alignItems: 'center', cursor: 'pointer', background: 'var(--danger)',
                                     color: 'white', boxShadow: '0 8px 12px -3px rgba(0,0,0,0.15)'
