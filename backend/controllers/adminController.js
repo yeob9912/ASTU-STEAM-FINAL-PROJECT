@@ -5,7 +5,7 @@ import Ticket from '../models/Ticket.js';
 import mammoth from 'mammoth';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+const pdfParse = require('pdf-parse').default ?? require('pdf-parse');
 import { chunkText, embedText } from '../utils/rag.js';
 import Chunk from '../models/Chunk.js';
 import Notification from '../models/Notification.js';
