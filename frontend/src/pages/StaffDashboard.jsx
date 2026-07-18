@@ -482,7 +482,7 @@ const StaffDashboard = ({ user, setUser, onLogout, theme, toggleTheme }) => {
                                                     </div>
                                                     <div>
                                                         <div style={{ fontWeight: 600 }}>{c.studentName || c.student}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ASTU Student</div>
+                                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>University Student</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -871,7 +871,7 @@ const StaffSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile(formData);
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo updated!');
             }
         } catch (err) { setUpdateMsg('Upload failed'); }
@@ -885,7 +885,7 @@ const StaffSettingsView = ({ user, setUser }) => {
             const res = await apiDeleteProfilePicture();
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo deleted!');
             }
         } catch (err) { setUpdateMsg('Deletion failed'); }
@@ -900,7 +900,7 @@ const StaffSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile({ email });
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile updated successfully!');
             }
         } catch (err) { setUpdateMsg('Update failed'); }

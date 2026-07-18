@@ -749,7 +749,7 @@ const StudentSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile(formData);
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo updated!');
             } else {
                 setUpdateMsg(res.message || 'Update failed');
@@ -767,7 +767,7 @@ const StudentSettingsView = ({ user, setUser }) => {
             const res = await apiDeleteProfilePicture();
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo deleted!');
             } else {
                 setUpdateMsg(res.message || 'Deletion failed');
@@ -786,7 +786,7 @@ const StudentSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile({ email });
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile updated successfully!');
             } else {
                 setUpdateMsg(res.message || 'Update failed');
@@ -898,7 +898,7 @@ const StudentSettingsView = ({ user, setUser }) => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             style={{ padding: '1rem', borderRadius: '12px', fontSize: '1rem', fontWeight: 500 }}
-                            placeholder="name@astu.edu.et"
+                            placeholder="name@university.edu"
                             disabled
                         />
                     </div>

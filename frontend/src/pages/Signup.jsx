@@ -80,8 +80,8 @@ const Signup = ({ onSignup }) => {
         try {
             const res = await apiGoogleLogin(response.credential);
             if (!res.success) { setError(res.message || 'Google sign-up failed'); setLoading(false); return; }
-            localStorage.setItem('astu_token', res.token);
-            localStorage.setItem('astu_user', JSON.stringify(res.user));
+            localStorage.setItem('token', res.token);
+            localStorage.setItem('user', JSON.stringify(res.user));
             onSignup(res.user);
             navigate('/');
         } catch { setError('Server error. Is the backend running?'); }
@@ -114,8 +114,8 @@ const Signup = ({ onSignup }) => {
         try {
             const res = await apiSignup(formData);
             if (!res.success) { setError(res.message || 'Signup failed'); setLoading(false); return; }
-            localStorage.setItem('astu_token', res.token);
-            localStorage.setItem('astu_user', JSON.stringify(res.user));
+            localStorage.setItem('token', res.token);
+            localStorage.setItem('user', JSON.stringify(res.user));
             onSignup(res.user);
             navigate('/');
         } catch { setError('Server error. Is the backend running?'); }
@@ -145,7 +145,7 @@ const Signup = ({ onSignup }) => {
                         <UserCheck size={32} />
                     </motion.div>
                     <h2 style={{ color: 'var(--primary)', margin: 0, fontSize: '1.8rem', letterSpacing: '-0.5px' }}>Student Registration</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Create your ASTU student account</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Create your student account</p>
                 </div>
 
                 {/* Form */}
@@ -161,7 +161,7 @@ const Signup = ({ onSignup }) => {
                     {/* Email */}
                     <div style={{ position: 'relative' }}>
                         <Mail size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input type="email" placeholder="ASTU Student Email" className="input" style={{ paddingLeft: '45px' }}
+                        <input type="email" placeholder="University Student Email" className="input" style={{ paddingLeft: '45px' }}
                             value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
                     </div>
 

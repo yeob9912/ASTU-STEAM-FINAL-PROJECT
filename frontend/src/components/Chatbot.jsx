@@ -8,7 +8,7 @@ const Chatbot = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [messages, setMessages] = useState([
-        { text: 'Hi! I am the ASTU Smart Assistant. How can I help you with your campus issue today?', isBot: true }
+        { text: 'Hi! I am the Student Smart Assistant. How can I help you with your campus issue today?', isBot: true }
     ]);
     const [input, setInput] = useState('');
     const [chats, setChats] = useState([]);
@@ -43,13 +43,13 @@ const Chatbot = () => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
         const handleOpenChat = () => setIsOpen(true);
         window.addEventListener('resize', handleResize);
-        window.addEventListener('open-astu-chatbot', handleOpenChat);
+        window.addEventListener('open-chatbot', handleOpenChat);
 
         if (isOpen) fetchHistory();
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            window.removeEventListener('open-astu-chatbot', handleOpenChat);
+            window.removeEventListener('open-chatbot', handleOpenChat);
         };
     }, [isOpen]);
 
@@ -208,7 +208,7 @@ const Chatbot = () => {
     };
 
     const startNewChat = () => {
-        setMessages([{ text: 'Hi! I am the ASTU Smart Assistant. How can I help you today?', isBot: true }]);
+        setMessages([{ text: 'Hi! I am the Student Smart Assistant. How can I help you today?', isBot: true }]);
         setCurrentChatId(null);
         currentChatIdRef.current = null;
         setShowHistory(false);
@@ -236,7 +236,7 @@ const Chatbot = () => {
                                             <Bot size={16} />
                                         </div>
                                         <div>
-                                            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>ASTU Assistant</h3>
+                                            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700 }}>Student Assistant</h3>
                                             <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 600 }}>● Active</span>
                                         </div>
                                     </div>

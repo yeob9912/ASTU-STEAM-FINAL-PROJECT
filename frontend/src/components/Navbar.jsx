@@ -119,7 +119,7 @@ const Navbar = ({ user, theme, toggleTheme, onLogout }) => {
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const toggleChatbot = () => {
-        window.dispatchEvent(new CustomEvent('open-astu-chatbot'));
+        window.dispatchEvent(new CustomEvent('open-chatbot'));
         setIsMobileMenuOpen(false);
     };
 
@@ -174,7 +174,7 @@ const Navbar = ({ user, theme, toggleTheme, onLogout }) => {
                 <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '10px', color: 'white' }}>
                     <Layout size={22} />
                 </div>
-                <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--primary)', letterSpacing: '-0.5px' }}>ASTU Smart</h3>
+                <h3 style={{ margin: 0, fontSize: '1.4rem', color: 'var(--primary)', letterSpacing: '-0.5px' }}>Student Compliant</h3>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -449,7 +449,7 @@ const Navbar = ({ user, theme, toggleTheme, onLogout }) => {
                                     <div style={{ padding: '8px', background: 'var(--primary)', borderRadius: '10px', color: 'white' }}>
                                         <Layout size={20} />
                                     </div>
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary)', fontWeight: 800 }}>ASTU Smart</h3>
+                                    <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--primary)', fontWeight: 800 }}>Student Compliant</h3>
                                 </div>
                                 <button className="btn" onClick={() => setIsMobileMenuOpen(false)} style={{
                                     padding: '8px 10px', background: 'var(--bg-main)', border: '1px solid var(--border)',

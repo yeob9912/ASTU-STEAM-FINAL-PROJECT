@@ -56,8 +56,8 @@ const Login = ({ onLogin }) => {
         try {
             const res = await apiGoogleLogin(response.credential);
             if (!res.success) { setError(res.message || 'Google login failed'); setLoading(false); return; }
-            localStorage.setItem('astu_token', res.token);
-            localStorage.setItem('astu_user', JSON.stringify(res.user));
+            localStorage.setItem('token', res.token);
+            localStorage.setItem('user', JSON.stringify(res.user));
             onLogin(res.user);
             const paths = { student: '/student', staff: '/staff', admin: '/admin' };
             navigate(paths[res.user.role] || '/');
@@ -79,8 +79,8 @@ const Login = ({ onLogin }) => {
         try {
             const res = await apiLogin({ email, password });
             if (!res.success) { setError(res.message || 'Login failed'); setLoading(false); return; }
-            localStorage.setItem('astu_token', res.token);
-            localStorage.setItem('astu_user', JSON.stringify(res.user));
+            localStorage.setItem('token', res.token);
+            localStorage.setItem('user', JSON.stringify(res.user));
             onLogin(res.user);
             const paths = { student: '/student', staff: '/staff', admin: '/admin' };
             navigate(paths[res.user.role] || '/');
@@ -111,14 +111,14 @@ const Login = ({ onLogin }) => {
                         <ShieldCheck size={32} />
                     </motion.div>
                     <h2 style={{ fontSize: '1.8rem', color: 'var(--primary)', margin: 0, letterSpacing: '-0.5px' }}>Complaint System</h2>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Login to ASTU Complaint System</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.5rem' }}>Login to Student Complaint System</p>
                 </div>
 
                 {/* Email / Password form */}
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                     <div style={{ position: 'relative' }}>
                         <User size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                        <input type="email" placeholder="ASTU Email" className="input"
+                        <input type="email" placeholder="University Email" className="input"
                             style={{ paddingLeft: '45px' }} value={email}
                             onChange={(e) => setEmail(e.target.value)} required />
                     </div>

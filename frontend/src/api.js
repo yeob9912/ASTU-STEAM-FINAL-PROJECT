@@ -4,7 +4,7 @@ const API_BASE = `${SERVER_URL}/api`;
 
 // Helper: get auth headers
 const authHeaders = () => {
-    const token = localStorage.getItem('astu_token');
+    const token = localStorage.getItem('token');
     return {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -22,7 +22,7 @@ export const apiGoogleLogin = (idToken) =>
     fetch(`${API_BASE}/auth/google`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken }) }).then(r => r.json());
 
 export const apiUpdateProfile = (data) => {
-    const token = localStorage.getItem('astu_token');
+    const token = localStorage.getItem('token');
     const isFormData = data instanceof FormData;
     return fetch(`${API_BASE}/auth/profile`, {
         method: 'PUT',
@@ -39,7 +39,7 @@ export const apiChangePassword = (data) =>
 
 
 export const apiCreateTicket = (formData) => {
-    const token = localStorage.getItem('astu_token');
+    const token = localStorage.getItem('token');
     return fetch(`${API_BASE}/tickets`, {
         method: 'POST',
         headers: {
@@ -140,7 +140,7 @@ export const apiSendMessage = (data) =>
 
 // Admin — RAG
 export const apiUploadKnowledgeBase = (formData) => {
-    const token = localStorage.getItem('astu_token');
+    const token = localStorage.getItem('token');
     return fetch(`${API_BASE}/admin/rag/upload`, {
         method: 'POST',
         headers: {
@@ -158,7 +158,7 @@ export const apiDeleteKnowledgeBaseFile = (filename) =>
 
 // For streaming
 export const apiSendMessageStream = (data) => {
-    const token = localStorage.getItem('astu_token');
+    const token = localStorage.getItem('token');
     return fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: {

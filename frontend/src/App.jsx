@@ -12,15 +12,15 @@ import './index.css';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState(localStorage.getItem('astu_theme') || 'light');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('astu_user');
+    const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (err) {
-        localStorage.removeItem('astu_user');
+        localStorage.removeItem('user');
       }
     }
     setLoading(false);
@@ -32,21 +32,21 @@ function App() {
     } else {
       document.body.classList.remove('dark');
     }
-    localStorage.setItem('astu_theme', theme);
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const handleLogout = () => {
-    localStorage.removeItem('astu_user');
-    localStorage.removeItem('astu_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setUser(null);
   };
 
   if (loading) return (
     <div className="loading-screen">
       <div className="spinner"></div>
-      <span>Readying ASTU Portal…</span>
+      <span>Readying Student Portal…</span>
     </div>
   );
 

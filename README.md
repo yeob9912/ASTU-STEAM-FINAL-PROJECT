@@ -1,7 +1,7 @@
-# 🎓 ASTU Smart Complaint & Issue Tracking System  
+# 🎓 University Student Complaint & Issue Tracking System  
 ### 🚀 Full-Stack AI-Powered Complaint Management Platform (MERN + RAG)
 
-A modern full-stack web application developed to digitalize complaint management at **Adama Science and Technology University (ASTU)**.
+A modern full-stack web application developed to digitalize complaint management for **University Students**.
 
 This system integrates **React, Node.js, Express, MongoDB**, and **Retrieval-Augmented Generation (RAG)** to provide structured workflow, analytics, and intelligent AI assistance.
 
@@ -9,7 +9,7 @@ This system integrates **React, Node.js, Express, MongoDB**, and **Retrieval-Aug
 
 ## 📌 Problem Statement
 
-Students at ASTU face various campus-related issues such as:
+University students face various campus-related issues such as:
 
 - 🏢 Dormitory maintenance problems  
 - 🧪 Laboratory equipment malfunction  
@@ -171,9 +171,8 @@ RAG AI Pipeline
 
 ## 👨💻 Developer
 
-**Yehwala obssi**  
+**Yehwala Obssi**  
 Computer Science & Engineering Student  
-Adama Science and Technology University  
 
 ---
 

@@ -1134,7 +1134,7 @@ const AdminDashboard = ({ user, setUser, theme, toggleTheme, onLogout }) => {
                         <h1 style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.5px', textTransform: 'capitalize', margin: 0 }}>
                             {activeSection === 'overview' ? `Welcome, ${capitalize(user?.name?.split(' ')[0])}` : activeSection}
                         </h1>
-                        <p style={{ color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>Managing ASTU campus operations</p>
+                        <p style={{ color: 'var(--text-muted)', margin: '0.2rem 0 0 0' }}>Managing university campus operations</p>
                     </div>
                 </header>
 
@@ -1618,7 +1618,7 @@ const AdminSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile(formData);
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo updated!');
             }
         } catch (err) { setUpdateMsg('Upload failed'); }
@@ -1632,7 +1632,7 @@ const AdminSettingsView = ({ user, setUser }) => {
             const res = await apiDeleteProfilePicture();
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile photo deleted!');
             }
         } catch (err) { setUpdateMsg('Deletion failed'); }
@@ -1647,7 +1647,7 @@ const AdminSettingsView = ({ user, setUser }) => {
             const res = await apiUpdateProfile({ email });
             if (res.success) {
                 setUser(res.user);
-                localStorage.setItem('astu_user', JSON.stringify(res.user));
+                localStorage.setItem('user', JSON.stringify(res.user));
                 setUpdateMsg('Profile updated successfully!');
             }
         } catch (err) { setUpdateMsg('Update failed'); }
