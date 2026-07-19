@@ -3,9 +3,7 @@ import Announcement from '../models/Announcement.js';
 import Category from '../models/Category.js';
 import Ticket from '../models/Ticket.js';
 import mammoth from 'mammoth';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse').default ?? require('pdf-parse');
+import { PDFParse } from 'pdf-parse';
 import { chunkText, embedText } from '../utils/rag.js';
 import Chunk from '../models/Chunk.js';
 import Notification from '../models/Notification.js';
@@ -357,7 +355,8 @@ const uploadKnowledgeBase = async (req, res) => {
         console.log(`Analyzing file type: ${req.file.mimetype} for file: ${req.file.originalname}`);
 
         if (req.file.mimetype === 'application/pdf') {
-            const result = await pdfParse(req.file.buffer);
+            const parser = new PDFParse({ data: req.file.buffer });
+            const result = await parser.getText();
             content = result.text;
         } else if (req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || req.file.originalname.endsWith('.docx')) {
             const result = await mammoth.extractRawText({ buffer: req.file.buffer });
