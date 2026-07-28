@@ -168,6 +168,7 @@ RAG AI Pipeline
 - Real-time chat between staff and students  
 
 ---
+Demo : https://astu-steam-project.vercel.app/
 
 ## 👨💻 Developer
 
